@@ -68,3 +68,16 @@ const auth = useFirebaseAuth();
     isAuth
   };
 });
+
+
+//    // crear computed property con parametro
+//    const propertyPrice = computed(()=>{
+
+//     return (price) =>
+
+//         Number(price).toLocaleString('es-CL',{
+//             style: 'currency',
+//             currency: 'CLP'
+//         })
+
+// })
