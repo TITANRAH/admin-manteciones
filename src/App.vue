@@ -1,5 +1,6 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
+import LogoTuercas from '../src/assets/img/logo-tuercas.png'
 import { ref } from 'vue';
 
 
@@ -15,19 +16,52 @@ const toggle = () => {
 
 
 <template>
+  <v-card elevation="1" max-width="1200" class="mx-auto">
 
-<v-card elevation="3" max-width="1200" class="mx-auto">
 
-<v-layout>
-  <v-app-bar color="blue-darken-1">
 
-    <template v-slot:prepend>
-      <v-btn @click="toggle()" icon="mdi-menu"></v-btn>
-    </template>
-  </v-app-bar>
+    <v-layout>
 
-    <v-navigation-drawer app color="#2784ff" v-model="drawer" @click="toggle()">
-        <v-list-item prepend-avatar="https://randomuser.me/api/portraits/men/85.jpg" title="John Leider" nav>
+
+
+
+      <v-app-bar class="bg-indigo">
+
+
+
+        <!-- esto ubica el elemento al lado izquierdo -->
+        <template v-slot:prepend>
+
+          <v-btn :icon="drawer ? 'mdi-close' : 'mdi-menu'" @click="toggle()"></v-btn>
+         
+        </template>
+        <!-- esto ubica el elemento al lado izquierdo -->
+
+
+        <template v-slot:append>
+          <div>
+
+            <v-btn>
+              Agregar Vehículo
+            </v-btn>
+            <v-btn icon="mdi-logout">
+             
+            </v-btn>
+          </div>
+
+          <div>
+
+            <v-btn 
+            :to="{name: 'login'}"
+            icon="mdi-login">
+          
+            </v-btn>
+
+          </div>
+        </template>
+      </v-app-bar>
+      <v-navigation-drawer class="bg-indigo"  temporary v-model="drawer" @click="toggle()">
+        <v-list-item color="#FFF" :prepend-avatar="LogoTuercas" title="TUERCAS" nav>
           <template v-slot:append>
             <v-btn variant="text" icon="mdi-chevron-left" @click.stop="rail = !rail"></v-btn>
           </template>
@@ -36,31 +70,25 @@ const toggle = () => {
         <v-divider></v-divider>
 
         <v-list density="compact" nav>
-          <v-list-item prepend-icon="mdi-home-city" title="Home" value="home"></v-list-item>
-          <v-list-item prepend-icon="mdi-account" title="My Account" value="account"></v-list-item>
-          <v-list-item prepend-icon="mdi-account-group-outline" title="Users" value="users"></v-list-item>
+          <v-list-item prepend-icon="mdi-car-arrow-right" title="Agregar Vehículo" value="car"></v-list-item>
+          <v-list-item prepend-icon="mdi-account-group-outline" title="Clientes" value="clientes"></v-list-item>
+          <v-list-item prepend-icon="mdi-car-cog" title="Dashboard" value="dashboard"></v-list-item>
+         
         </v-list>
       </v-navigation-drawer>
 
-    <!-- esto ubica el elemento al lado derecho -->
-   
-  
+      <v-main>
+        <v-container>
 
+          <RouterView />
 
+        </v-container>
+      </v-main>
 
-
-  <v-main>
-    <v-container>
-      <RouterView />
-
-    </v-container>
-  </v-main>
-
-</v-layout>
-</v-card>
- 
-
- 
+    </v-layout>
+  </v-card>
 </template>
 
-<style scoped></style>
+<style>
+
+</style>
