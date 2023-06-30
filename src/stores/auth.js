@@ -22,7 +22,7 @@ const auth = useFirebaseAuth();
   onMounted(() => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        console.log("user AUTENTICADO desde onmounted store onAuthStateChanged,", user);
+        // console.log("user AUTENTICADO desde onmounted store onAuthStateChanged,", user);
       authUser.value= user
     }
     });

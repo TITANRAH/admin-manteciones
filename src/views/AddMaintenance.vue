@@ -1,10 +1,10 @@
 <script setup>
 import { useForm, useField } from 'vee-validate';
-import { validacionSchema, imageSchema } from '../validations/mantencionesSchema'
-// import { collection, addDoc } from "firebase/firestore";
-// import { useFirestore } from 'vuefire'
+import { validacionSchema, imageSchema } from '@/validations/mantencionesSchema'
+import { collection, addDoc } from "firebase/firestore";
+import { useFirestore } from 'vuefire'
 import { useRouter } from 'vue-router';
-// import useImage from '@/composables/useImage';
+import useImage from '@/composables/useImage';
 
 
 
@@ -23,12 +23,12 @@ const cadaCuantosKm = [10000, 15000]
 
 
 
-// const { uploadImage, image, url } = useImage()
+const { uploadImage, image, url } = useImage()
 
 
 const router = useRouter()
 
-// const db = useFirestore()
+const db = useFirestore()
 
 const { handleSubmit } = useForm({
 
@@ -64,31 +64,25 @@ const vujias =  useField('vujias', null, {
 
 
 
-// const submit = handleSubmit(async (values) => {
-
-//   const { imagen, ...propiedad } = values
-
-//   console.log(propiedad)
 
 
-//   const docRef = await addDoc(collection(db, "propiedades"), {
+const submit = handleSubmit(async(values) => {
+  const { imagenVehiculo, ...mantencion } = values
+console.log('mantencion', mantencion)
+const docRef = await addDoc(collection(db, "mantenciones"), {
 
-//     ...propiedad,
-//     imagen: url.value,
-//     ubicacion: center.value
-//   });
+  ...mantencion,
+  imagen: url.value,
+ 
+});
 
-//   if (docRef.id) {
-//     router.push({ name: 'admin-propiedades' })
-//   }
-//   console.log("Document written with ID: ", docRef.id);
-// })
+if (docRef.id) {
 
-const submit = handleSubmit((values) => {
-
-  console.log('click subit')
-  console.log(values);
-  router.push({name: 'mantenciones'})
+  console.log('docRef.id', docRef.id)
+  router.push({ name: 'mantenciones' })
+}
+console.log("documento guardado con ID: ", docRef.id);
+  
 })
 
 </script>
@@ -132,15 +126,10 @@ const submit = handleSubmit((values) => {
       :error-messages="valorMantencion.errorMessage.value"
       />
 
-      <!-- <v-text-field class="mb-5" label="Nombre Dueño" v-model="precio.value.value"
-          :error-messages="precio.errorMessage.value" 
-          :error-messages="imagen.errorMessage.value" @change="uploadImage"
-          /> -->
-
-      <!-- acepta iconos de material desing busco aca https://pictogrammers.com/library/mdi/ con el prefijo mdi -->
       <v-file-input accept="image/jpeg" label="Fotografía" prepend-icon="mdi-camera" class="mb-5"
         v-model="imagenVehiculo.value.value"
         :error-messages="imagenVehiculo.errorMessage.value"
+        @change="uploadImage"
         >
       </v-file-input>
 
@@ -150,10 +139,10 @@ const submit = handleSubmit((values) => {
 
 
 
-      <!-- <div v-if="image" class="my-5">
+      <div v-if="image" class="my-5">
         <p class="font-weight-bold">Imagen Vehículo: </p>
         <img :src="image" class="w-50">
-      </div> -->
+      </div>
 
 
 
