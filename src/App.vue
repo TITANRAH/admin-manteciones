@@ -1,10 +1,16 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView, useRoute } from 'vue-router'
 import LogoTuercas from '../src/assets/img/logo-tuercas.png'
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useAuthStore } from '@/stores/auth';
+
+const route = useRoute()
+const auth = useAuthStore()
 
 
 const drawer = ref(true)
+
+
 
 const toggle = () => {
   drawer.value = !drawer.value
@@ -22,14 +28,14 @@ const toggle = () => {
         </template>
         <!-- esto ubica el elemento al lado izquierdo -->
         <template v-slot:append>
-          <div>
-            <v-btn :to="{name: 'agregar-mantencion'}">
-              Agregar Mantención
-            </v-btn>
+          <v-btn v-if="route.name !== 'agregar-mantencion'" :to="{name: 'agregar-mantencion'}">
+            Agregar Mantención
+          </v-btn>
+          <div v-if="auth.isAuth">
             <v-btn icon="mdi-logout">
             </v-btn>
           </div>
-          <div>
+          <div v-else >
             <v-btn :to="{ name: 'login' }" icon="mdi-login">
             </v-btn>
           </div>

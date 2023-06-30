@@ -3,28 +3,18 @@
 
 import {useForm, useField} from 'vee-validate'
 import { loginSchema as validationSchema } from '../validations/loginSchema'
-// import { useAuthStore } from '@/stores/auth';
-import { useRouter } from 'vue-router';
-// creo un archivo de validaciones lo importo y lo agrego aca
+import { useAuthStore } from '@/stores/auth';
+
+
 const { handleSubmit } = useForm({validationSchema})
-
-
-// const auth = useAuthStore()
-const router = useRouter() // despus mover a composable
-
+const auth = useAuthStore()
 const email = useField('email')
 const password = useField('password')
 
-
-
 const submit = handleSubmit((values)=>{
-    // auth.login(values)
-
+    auth.login(values)
     console.log(values);
-    router.push({name: 'dashboard'})
-
 })
-
 
 </script>
 
@@ -39,16 +29,13 @@ const submit = handleSubmit((values)=>{
             Inicia Sesión con tu cuenta
         </v-card-subtitle>
 
-        <!-- <v-alert
+        <v-alert
             v-if="auth.hasError"
             class="my-5"
             type="error"
-            :title="auth.errorMsg"
-            
+            :title="auth.errorMsg"        
         > 
-
-
-        </v-alert>-->
+        </v-alert>
 
         <v-form class="mt-5">
             <v-text-field

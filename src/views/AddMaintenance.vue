@@ -8,6 +8,7 @@ import { useRouter } from 'vue-router';
 
 
 
+
 // PARA INTERACTUAR CON LA AUTENTICACION SE USA useFirebaseAuth 
 // EN ESTE CASO PARA INTERACUTAR CON LA BASDE DE DATOS USAMOS useFirestore
 const años = [1990, 1991, 1992, 1993, 1994, 1995, 
@@ -21,17 +22,16 @@ const cadaCuantosKm = [10000, 15000]
 
 
 
+
 // const { uploadImage, image, url } = useImage()
-// const { zoom ,center,pin } = useLocationMap()
+
+
 const router = useRouter()
 
 // const db = useFirestore()
 
 const { handleSubmit } = useForm({
-  // lo usamos asi por que creamos una validacion separada para imnagen
-  // para cuando toque editar, no lo requeriremos en este caso si  
-  // por que es una nueva propiedad y la forma de unirlos es asi con el spred 
-  // operator ya que handleSubmit admite solo un validationSchema 
+
     validationSchema: {
       ...validacionSchema,
       ...imageSchema
@@ -159,31 +159,31 @@ const submit = handleSubmit((values) => {
 
       <v-row>
         <v-col cols="12" md="2.4">
-          <v-select label="Año Vehículo" class="mb-5" :items="años" v-model="añoVehiculo.value.value" 
+          <v-select label="Año Vehículo"  :items="años" v-model="añoVehiculo.value.value" 
           :error-messages="añoVehiculo.errorMessage.value"
           ></v-select>
         </v-col>
 
         <v-col cols="12" md="2.4">
-          <v-text-field class="mb-5" label="Patente" v-model="patenteVehiculo.value.value"
+          <v-text-field  label="Patente" v-model="patenteVehiculo.value.value"
           :error-messages="patenteVehiculo.errorMessage.value"
           />
         </v-col>
 
         <v-col cols="12" md="2.4">
-          <v-text-field class="mb-5" label="Fecha Mantención" v-model="fechaMantencion.value.value" 
+          <v-text-field  label="Fecha Mantención" v-model="fechaMantencion.value.value" 
           :error-messages="fechaMantencion.errorMessage.value"
           />
         </v-col>
 
         <v-col cols="12" md="2.4">
-          <v-text-field class="mb-5" label="Kilometraje" v-model="kmVehiculo.value.value"
+          <v-text-field  label="Kilometraje" v-model="kmVehiculo.value.value"
           :error-messages="kmVehiculo.errorMessage.value"
           />
         </v-col>
 
         <v-col cols="12" md="2.4">
-          <v-select label="Próxima manteción (km)" class="mb-5" :items="cadaCuantosKm" v-model="proximaMantencion.value.value"
+          <v-select label="Próxima manteción (km)"  :items="cadaCuantosKm" v-model="proximaMantencion.value.value"
           :error-messages="proximaMantencion.errorMessage.value"
           
           ></v-select>
