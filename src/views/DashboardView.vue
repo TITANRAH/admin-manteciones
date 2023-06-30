@@ -1,10 +1,15 @@
+    <script setup>
+    
+    
+    
+    
+    </script>
 <template>
    <h1>Dashboard</h1>
+
+    <v-btn :to="{name: 'mantenciones'}">Mantenciones</v-btn>
 </template>
 
-<script setup>
-
-</script>
 
 <style lang="scss" scoped>
 
