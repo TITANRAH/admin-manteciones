@@ -23,8 +23,8 @@ const toggle = () => {
         <!-- esto ubica el elemento al lado izquierdo -->
         <template v-slot:append>
           <div>
-            <v-btn>
-              Agregar Vehículo
+            <v-btn :to="{name: 'agregar-mantencion'}">
+              Agregar Mantención
             </v-btn>
             <v-btn icon="mdi-logout">
             </v-btn>
@@ -43,7 +43,7 @@ const toggle = () => {
         <v-divider></v-divider>
 
         <v-list density="compact" nav >
-          <v-list-item prepend-icon="mdi-car-arrow-right" @click="toggle()" title="Agregar Vehículo" value="car" ></v-list-item>
+          <v-list-item prepend-icon="mdi-car-arrow-right" @click="toggle()" title="Agregar Mantención" value="car" :to="{name: 'agregar-mantencion'}"></v-list-item>
           <v-list-item prepend-icon="mdi-account-group-outline" @click="toggle()" title="Clientes" value="clientes"></v-list-item>
           <v-list-item prepend-icon="mdi-car-settings" title="Dashboard" @click="toggle()" value="dashboard" :to="{name: 'dashboard'}"></v-list-item>
           <v-list-item prepend-icon="mdi-logout" title="Salir" @click="toggle()" value="salir" :to="{name: 'login'}"></v-list-item>

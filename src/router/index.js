@@ -32,6 +32,11 @@ const router = createRouter({
       name: 'mantencion',
       component: ()=> import('../views/MantencionPorClienteView.vue')
     },
+    {
+      path: '/agregar-mantencion',
+      name: 'agregar-mantencion',
+      component: ()=> import('../views/AddMaintenance.vue')
+    },
    
   ]
 })
