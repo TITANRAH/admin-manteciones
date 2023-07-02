@@ -11,7 +11,7 @@ const años = [1990, 1991, 1992, 1993, 1994, 1995,
 1996, 1997, 1998, 1999, 2000, 2001, 2002, 
 2003, 2004, 2005, 2006, 2007, 2008, 2009,
 2010, 2011, 2012, 2013, 2014,2015, 2016, 
-2017, 2018, 2019, 2020
+2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024
 ]
 //ARRAY PARA LOS KM EN LA VISTA
 const cadaCuantosKm = [10000, 15000]
@@ -186,23 +186,29 @@ console.log("documento guardado con ID: ", docRef.id);
      </v-card-subtitle>
 
       <v-row>
-        <v-col cols="12" md="4">
+        <v-col cols="12" md="3">
           <v-text-field  label="Kilometraje" v-model="kmVehiculo.value.value"
           :error-messages="kmVehiculo.errorMessage.value"
           />
         </v-col>
    
-        <v-col cols="12" md="4">
+        <v-col cols="12" md="3">
           <v-text-field  label="Patente" v-model="patenteVehiculo.value.value"
           :error-messages="patenteVehiculo.errorMessage.value"
           />
         </v-col>
 
-        <v-col cols="12" md="4">
+        <v-col cols="12" md="3">
           <v-select label="Año Vehículo"  :items="años" v-model="añoVehiculo.value.value" 
           :error-messages="añoVehiculo.errorMessage.value"
           ></v-select>
         </v-col>  
+
+        <v-col cols="12" md="3">
+          <v-text-field type="date"  label="Fecha Mantención (Hoy)" v-model="fechaMantencion.value.value" 
+          :error-messages="fechaMantencion.errorMessage.value"
+        />
+        </v-col> 
       </v-row>
 
       <v-row>
@@ -214,11 +220,7 @@ console.log("documento guardado con ID: ", docRef.id);
             <v-checkbox label="Cambio de Filtro de aceite" v-model="filtroAceite.value.value" />
           </v-col>
 
-          <v-col cols="12" md="4"  v-if="aceite.value.value" >
-            <v-text-field class="mb-0" label="Aceite" v-model="aceiteDescripcion.value.value"
-            :error-messages="aceiteDescripcion.errorMessage.value"
-          />       
-          </v-col>
+         
       </v-row>
       
 
@@ -228,12 +230,14 @@ console.log("documento guardado con ID: ", docRef.id);
           :error-messages="cambioAceite.errorMessage.value"      
           ></v-select>
         </v-col>
+
+        <v-col cols="12" md="6"  v-if="aceite.value.value" >
+            <v-text-field class="mb-0" label="Aceite" v-model="aceiteDescripcion.value.value"
+            :error-messages="aceiteDescripcion.errorMessage.value"
+          />       
+          </v-col>
          
-        <v-col cols="12" md="6">
-          <v-text-field  label="Fecha Mantención (Hoy)" v-model="fechaMantencion.value.value" 
-          :error-messages="fechaMantencion.errorMessage.value"
-        />
-        </v-col> 
+      
       </v-row>
       <v-row>
         <v-col cols="12" md="4">

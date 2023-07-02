@@ -32,7 +32,7 @@ defineProps({
 
                <v-col cols="8" md="8" sm="12">
                   <h4 class="text-white">{{ mantencion?.nombreDueño }}</h4>
-                  <h6 class="text-white">Auto: {{ mantencion?.marcaVehiculo + ': ' + mantencion?.añoVehiculo }}</h6>
+                  <h6 class="text-white">Auto: {{ mantencion?.marcaVehiculo + ' ' + mantencion?.añoVehiculo }}</h6>
                   <h6 class="text-white">Patente: {{ mantencion?.patenteVehiculo }}</h6>
                </v-col>
 
