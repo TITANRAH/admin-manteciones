@@ -2,72 +2,58 @@
 
 import useMantenciones from '../composables/useMaintenance'
 import Mantencion from '../components/Mantencion.vue';
-import { useForm, useField } from 'vee-validate';
-import { filterSchema } from '../validations/filterSchema';
+import { useField } from 'vee-validate';
 
 
-const {   filterItems, patente
-        } = useMantenciones()
+
+const { filterItems, patente, nombre
+} = useMantenciones()
 
 
-const { handleSubmit } = useForm({filterSchema})
-const submit = handleSubmit((value)=>{
-    
-    patente.value = value['filter']
-   
-})
+
+// const submit = handleSubmit((value)=>{
+
+//     patente.value = value['filter']
+
+// })
+
+
 
 const filter = useField('filter')
+const nameFilter = useField('filter')
 
+const filterPatente = () => {
+    if (filter.value.value != '' || filter.value.value != undefined) {
+        patente.value = filter.value.value
+    } else {
+        return
+    }
+}
+
+const filterName = () => {  
+    if (nameFilter.value.value != '' || nameFilter.value.value != undefined) {
+        nombre.value = nameFilter.value.value
+    } else {
+        return
+    }
+}
 </script>
 <template>
     <h1 class="text-indigo mb-10"> <v-icon color="indigo" icon="mdi-car-cog" class="mr-3"></v-icon>Mantenciones</h1>
-
-    <v-card flat max-width="600" class=" my-10">
-        <v-card-title class="text-h5 font-weight-bold mb-2">
-            Buscar por patente
-        </v-card-title>
-
-        <v-form class="">
-
-            <v-row>
-            <v-col>
-                <v-text-field
-                    type="text"
-                    label="Patente"
-                    bg-color="blue-grey-lighten-5"
-                    v-model="filter.value.value"
-                    class="mb-1"
-                    :error-messages="filter.errorMessage.value"
-                />
-
+    <v-card flat>
+        <v-row>
+            <v-col cols="12" md="6" sm="6">
+                <v-text-field type="text" label="Busca por Patente" bg-color="blue-grey-lighten-5"
+                    v-model="filter.value.value" class="mb-1" @input="filterPatente" />
             </v-col>
-
-            <v-col>
-                
-                <v-icon 
-                size="50"
-                    block
-                    icon="mdi-car-search-outline"
-                    color="indigo"
-                    @click="submit"
-                    >
-                </v-icon>
+           <v-col cols="12" md="6" sm="6">
+                <v-text-field type="text" label="Busca por Nombre de Cliente" bg-color="blue-grey-lighten-5"
+                    v-model="nameFilter.value.value" class="mb-1" @input="filterName" />
             </v-col>
         </v-row>
-
-           
-        </v-form>
     </v-card>
     <v-row>
-        <Mantencion 
-        
-        v-for="mantencion in filterItems"
-        :key="mantencion.id"
-        :propiedad="mantencion"
-        
-        />
-       
+        <Mantencion v-for="mantencion in filterItems" :key="mantencion.id" :propiedad="mantencion" />
     </v-row>
 </template>
 

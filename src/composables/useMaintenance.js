@@ -10,7 +10,8 @@ import { ref as storageRef, deleteObject } from "firebase/storage";
 
 export default function useMantenciones() {
   const patente = ref("");
-  const filterItemsCollection = ref([])
+  const nombre = ref("");
+  const filterItemsCollection = ref([]);
   const storage = useFirebaseStorage();
   const db = useFirestore();
   const mantencionesCollection = useCollection(collection(db, "mantenciones"));
@@ -18,48 +19,33 @@ export default function useMantenciones() {
   async function deleteItem(id, urlImage) {
     if (confirm("¿Deseas eliminar esta mantencion?")) {
       console.log(id);
-
       const docRef = doc(db, "mantenciones", id);
       const imageRef = storageRef(storage, urlImage);
-
-      // como neceisto tener 2 await los puedo utilizar asi en un Promise.all
       await Promise.all([deleteDoc(docRef), deleteObject(imageRef)]);
     }
   }
-  // si tiene alberca trae las que tienen alberca si no todas
-  // filtra lo que hay en memoria no hace peticiones a la base de datos
-
-//   const filterItems = (patente) => {
-
-//     const existe = mantencionesCollection.value.filter(
-//         (mantencion) => mantencion.patenteVehiculo === patente
-//       )
-
-//       if(existe){
-//         filterItemsCollection.value = mantencionesCollection.value.filter(
-//             (mantencion) => mantencion.patenteVehiculo === patente
-//           )
-    
-//       } else {
-//         filterItemsCollection.value = mantencionesCollection.value
-//       }
-
-  
-  
-//   };
-
   const filterItems = computed(() => {
+    console.log("patente.value desde computed", patente.value);
 
-    console.log('patente.value desde computed', patente.value)
-    return patente.value != '' ? (mantencionesCollection.value.filter(
-        (mantencion) => mantencion.patenteVehiculo === patente.value)
-      ) : mantencionesCollection.value
-
+    if (patente.value != "" || nombre.value != "") {
+      if (nombre.value) {
+        return mantencionesCollection.value.filter((mantencion) =>
+          mantencion.nombreDueño.includes(nombre.value)
+        );
+      } else if (patente.value) {
+        return mantencionesCollection.value.filter((mantencion) =>
+          mantencion.patenteVehiculo.includes(patente.value)
+        );
+      }
+    } else {
+      return mantencionesCollection.value;
+    }
   });
   return {
     filterItemsCollection,
     filterItems,
     patente,
     deleteItem,
+    nombre,
   };
 }
