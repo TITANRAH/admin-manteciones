@@ -9,6 +9,7 @@ export default function useMantenciones() {
   const kmActual = ref()
   const proxMXkm = ref()
   const contactar = ref(false)
+  const semanasRestantes = ref(0)
   const proximaMantencionXkm = ref(0)
   const filterItemsCollection = ref([]);
   const storage = useFirebaseStorage();
@@ -66,7 +67,28 @@ export default function useMantenciones() {
       }
     }
  }
+
+ const calculoFechaProximaMantencion = (fecha) => {
+  const fechaOriginal = new Date(fecha);
+  const fechaCalculada = new Date(fechaOriginal.getFullYear(), fechaOriginal.getMonth() + 6, fechaOriginal.getDate());
+  // Formatear la fecha calculada al formato deseado
+  const fechaFormateada = `${fechaCalculada.getDate()}/${fechaCalculada.getMonth() + 1}/${fechaCalculada.getFullYear()}`;
+   
+  const tiempoRestante = fechaCalculada.getTime() - Date.now();
+  const semanas = Math.ceil(tiempoRestante / (1000 * 60 * 60 * 24 * 7));
+  semanasRestantes.value = semanas;
+
+  if(semanasRestantes.value <= 1){
+  
+    contactar.value = true
+  }else {
+   
+    contactar.value = false
+  }
+  return fechaFormateada;
+};
   return {
+    calculoFechaProximaMantencion,
     filterItemsCollection,
     filterItems,
     patente,
@@ -74,6 +96,7 @@ export default function useMantenciones() {
     nombre,
     calculoKmProxMantencion,
     contactarCliente,
-    contactar
+    contactar,
+    semanasRestantes
   };
 }

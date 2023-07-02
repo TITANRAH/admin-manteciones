@@ -1,9 +1,10 @@
 <script setup>
 import useMantenciones from '../composables/useMaintenance';
+import {formatedDate} from '../helpers/index'
 
 
 
-const { calculoKmProxMantencion ,contactar } = useMantenciones()
+const { contactar, calculoFechaProximaMantencion } = useMantenciones()
 
 
 defineProps({
@@ -41,7 +42,7 @@ defineProps({
                   
                      <v-col cols="12" md="4">
                         <h6 :class="contactar ? 'text-white no-wrap' : 'text-grey no-wrap'" style="white-space: nowrap">Mantención realizada:</h6>
-                        <h6 class="text-white">El día: {{ mantencion?.fechaMantencion }}</h6>
+                        <h6 class="text-white">El día: {{ formatedDate(mantencion?.fechaMantencion) }}</h6>
                      </v-col>
                      <v-col cols="12" md="4">
                         <h6 :class="contactar ? 'text-white no-wrap' : 'text-grey no-wrap'">Km. Actual:</h6>
@@ -50,8 +51,7 @@ defineProps({
                      <v-col cols="12" sm="4">
                         <h6 :class="contactar ? 'text-white no-wrap' : 'text-grey no-wrap'" style="white-space: nowrap">Próxima Mantención:</h6>
                         <!-- realizar helper que calcule la proxima mantencion -->
-                        <h6 class="text-white">A los {{ calculoKmProxMantencion(mantencion?.kmVehiculo,
-                           mantencion?.cambioAceite) }} Km.</h6>
+                        <h6 class="text-white">El día: {{ calculoFechaProximaMantencion(mantencion?.fechaMantencion) }}</h6>
                      </v-col>
                   </v-row>
                </v-col>
