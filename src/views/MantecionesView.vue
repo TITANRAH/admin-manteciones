@@ -10,21 +10,12 @@ const { filterItems, patente, nombre
 } = useMantenciones()
 
 
-
-// const submit = handleSubmit((value)=>{
-
-//     patente.value = value['filter']
-
-// })
-
-
-
-const filter = useField('filter')
-const nameFilter = useField('filter')
+const patenteFilter = useField('patenteFilter')
+const nameFilter = useField('nameFilter')
 
 const filterPatente = () => {
-    if (filter.value.value != '' || filter.value.value != undefined) {
-        patente.value = filter.value.value
+    if (patenteFilter.value.value != '' || patenteFilter.value.value != undefined) {
+        patente.value = patenteFilter.value.value
     } else {
         return
     }
@@ -44,7 +35,7 @@ const filterName = () => {
         <v-row>
             <v-col cols="12" md="6" sm="6">
                 <v-text-field type="text" label="Busca por Patente" bg-color="blue-grey-lighten-5"
-                    v-model="filter.value.value" class="mb-1" @input="filterPatente" />
+                    v-model="patenteFilter.value.value" class="mb-1" @input="filterPatente" />
             </v-col>
            <v-col cols="12" md="6" sm="6">
                 <v-text-field type="text" label="Busca por Nombre de Cliente" bg-color="blue-grey-lighten-5"
@@ -53,7 +44,10 @@ const filterName = () => {
         </v-row>
     </v-card>
     <v-row>
-        <Mantencion v-for="mantencion in filterItems" :key="mantencion.id" :propiedad="mantencion" />
+        <Mantencion 
+                v-for="mantencion in filterItems" 
+                :key="mantencion.id" 
+                :mantencion="mantencion" />
     </v-row>
 </template>
 

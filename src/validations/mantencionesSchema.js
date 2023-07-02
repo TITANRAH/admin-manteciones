@@ -3,20 +3,18 @@ export const validacionSchema = {
       if (value ) return true
       return 'El nombre del cliente es obligatorio'
     },
-    valorMantencion (value) {
-      /*
-          ^ - Representa el inicio de la cadena.
-          [0-9]+ - Representa cualquier número del 0 al 9. El + indica que debe haber al menos un dígito, pero puede haber más.
-          $ - Representa el final de la cadena.
-      */
-      if (/^[0-9]+$/.test(value)) return true
-      return 'El Valor solo deben ser números'
-    },
+    // valorMantencion (value) {
+    //   /*
+    //       ^ - Representa el inicio de la cadena.
+    //       [0-9]+ - Representa cualquier número del 0 al 9. El + indica que debe haber al menos un dígito, pero puede haber más.
+    //       $ - Representa el final de la cadena.
+    //   */
+    //   if (/^[0-9]+$/.test(value)) return true
+    //   return 'El Valor solo deben ser números'
+    // },
  
     correoDueño(value) {
-      if (!value) {
-        return 'Este campo es obligatorio';
-      }
+     
       // si es un email válido
       const regex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
       if (!regex.test(value)) {
@@ -42,18 +40,10 @@ export const validacionSchema = {
       return 'Indica una Patente'
     },
     kmVehiculo (value) {
-      if (value) return true
-      return 'Indica un kilometraje'
+      if (/^[0-9]+$/.test(value)) return true
+      return 'El Valor solo deben ser números'
     },
-    aceiteDescripcion (value) {
-      if (value) return true
-      return 'Indica que aceite usa el vehículo'
-    },
-    proximaMantencion (value) {
-      if (value) return true
-      return 'Indica cada cuantos km. tendra mantención'
-    },
- 
+   
 } 
   
 // esta separado por que al crear una nueva propiedad claro que necsitamos imagen 

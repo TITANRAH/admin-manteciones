@@ -1,20 +1,31 @@
 import { collection, doc, deleteDoc } from "firebase/firestore";
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useFirestore, useCollection, useFirebaseStorage } from "vuefire";
-
-// esto es para el storage basicamente para eliminar
-// el ref es de referencia no es de ref de vue
 import { ref as storageRef, deleteObject } from "firebase/storage";
-
-// useCollection es para traerme toda la coleccion en base de datos
 
 export default function useMantenciones() {
   const patente = ref("");
   const nombre = ref("");
+  const kmActual = ref()
+  const proxMXkm = ref()
+  const contactar = ref(false)
+  const proximaMantencionXkm = ref(0)
   const filterItemsCollection = ref([]);
   const storage = useFirebaseStorage();
   const db = useFirestore();
   const mantencionesCollection = useCollection(collection(db, "mantenciones"));
+
+ 
+
+  const calculoKmProxMantencion = (km, proxKm)=>{
+    kmActual.value = km
+    proxMXkm.value = proxKm
+
+    // pasar a logica de fecha
+    contactarCliente(kmActual.value, proxMXkm.value)
+
+    return proximaMantencionXkm.value = parseInt(km) + proxKm 
+  }
 
   async function deleteItem(id, urlImage) {
     if (confirm("¿Deseas eliminar esta mantencion?")) {
@@ -30,22 +41,39 @@ export default function useMantenciones() {
     if (patente.value != "" || nombre.value != "") {
       if (nombre.value) {
         return mantencionesCollection.value.filter((mantencion) =>
-          mantencion.nombreDueño.includes(nombre.value)
+          mantencion.nombreDueño.toLowerCase().includes(nombre.value.toLowerCase())
         );
       } else if (patente.value) {
         return mantencionesCollection.value.filter((mantencion) =>
-          mantencion.patenteVehiculo.includes(patente.value)
+          mantencion.patenteVehiculo.toLowerCase().includes(patente.value.toLowerCase())
         );
       }
     } else {
       return mantencionesCollection.value;
     }
   });
+
+    // pasar a logica de fecha
+   const contactarCliente = (km, proxKm)=>{
+    if(parseInt(km) != null && proxKm != ''){
+      
+      if( (proxKm + parseInt(km)) - parseInt(km) <= 15000){      
+       contactar.value = true
+      } else if (((parseInt(km) - proxKm ) <= 10000)){       
+        contactar.value = true
+      } else {
+        console.log((proxKm + parseInt(km)) - parseInt(km))
+      }
+    }
+ }
   return {
     filterItemsCollection,
     filterItems,
     patente,
     deleteItem,
     nombre,
+    calculoKmProxMantencion,
+    contactarCliente,
+    contactar
   };
 }
