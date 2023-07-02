@@ -6,9 +6,6 @@ import { useFirestore } from 'vuefire'
 import { useRouter } from 'vue-router';
 import useImage from '@/composables/useImage';
 
-
-
-
 // PARA INTERACTUAR CON LA AUTENTICACION SE USA useFirebaseAuth 
 // EN ESTE CASO PARA INTERACUTAR CON LA BASDE DE DATOS USAMOS useFirestore
 const años = [1990, 1991, 1992, 1993, 1994, 1995, 
@@ -20,11 +17,7 @@ const años = [1990, 1991, 1992, 1993, 1994, 1995,
 
 const cadaCuantosKm = [10000, 15000]
 
-
-
-
 const { uploadImage, image, url } = useImage()
-
 
 const router = useRouter()
 
@@ -61,9 +54,6 @@ const filtroAceite =  useField('filtroAceite', null, {
 const vujias =  useField('vujias', null, {
   initialValue: false
 })
-
-
-
 
 
 const submit = handleSubmit(async(values) => {
@@ -138,13 +128,10 @@ console.log("documento guardado con ID: ", docRef.id);
       />
 
 
-
       <div v-if="image" class="my-5">
         <p class="font-weight-bold">Imagen Vehículo: </p>
         <img :src="image" class="w-50">
       </div>
-
-
 
       <v-row>
         <v-col cols="12" md="2.4">
