@@ -1,35 +1,32 @@
 import { collection, doc, deleteDoc } from "firebase/firestore";
-import { computed, onMounted, ref } from "vue";
+import { computed, ref } from "vue";
 import { useFirestore, useCollection, useFirebaseStorage } from "vuefire";
 import { ref as storageRef, deleteObject } from "firebase/storage";
+
 
 export default function useMantenciones() {
   const patente = ref("");
   const nombre = ref("");
-  const kmActual = ref()
-  const proxMXkm = ref()
   const contactar = ref(false)
+  const usoFamiliar = ref(0)
   const semanasRestantes = ref(0)
-  const proximaMantencionXkm = ref(0)
   const filterItemsCollection = ref([]);
   const storage = useFirebaseStorage();
   const db = useFirestore();
   const mantencionesCollection = useCollection(collection(db, "mantenciones"));
 
- 
+  // const calculoKmProxMantencion = (km, proxKm)=>{
+  //   kmActual.value = km
+  //   proxMXkm.value = proxKm
 
-  const calculoKmProxMantencion = (km, proxKm)=>{
-    kmActual.value = km
-    proxMXkm.value = proxKm
+  //   // pasar a logica de fecha
+  //   contactarCliente(kmActual.value, proxMXkm.value)
 
-    // pasar a logica de fecha
-    contactarCliente(kmActual.value, proxMXkm.value)
-
-    return proximaMantencionXkm.value = parseInt(km) + proxKm 
-  }
+  //   return proximaMantencionXkm.value = parseInt(km) + proxKm 
+  // }
 
   async function deleteItem(id, urlImage) {
-    if (confirm("¿Deseas eliminar esta mantencion?")) {
+    if (confirm("¿Deseas eliminar esta mantención?")) {
       console.log(id);
       const docRef = doc(db, "mantenciones", id);
       const imageRef = storageRef(storage, urlImage);
@@ -55,20 +52,23 @@ export default function useMantenciones() {
   });
 
     // pasar a logica de fecha
-   const contactarCliente = (km, proxKm)=>{
-    if(parseInt(km) != null && proxKm != ''){
+//    const contactarCliente = (km, proxKm)=>{
+//     if(parseInt(km) != null && proxKm != ''){
       
-      if( (proxKm + parseInt(km)) - parseInt(km) <= 15000){      
-       contactar.value = true
-      } else if (((parseInt(km) - proxKm ) <= 10000)){       
-        contactar.value = true
-      } else {
-        console.log((proxKm + parseInt(km)) - parseInt(km))
-      }
-    }
- }
+//       if( (proxKm + parseInt(km)) - parseInt(km) <= 15000){      
+//        contactar.value = true
+//       } else if (((parseInt(km) - proxKm ) <= 10000)){       
+//         contactar.value = true
+//       } else {
+//         console.log((proxKm + parseInt(km)) - parseInt(km))
+//       }
+//     }
+//  }
+
+
 
  const calculoFechaProximaMantencion = (fecha) => {
+  console.log('numeroMeses', usoFamiliar.value)
   const fechaOriginal = new Date(fecha);
   const fechaCalculada = new Date(fechaOriginal.getFullYear(), fechaOriginal.getMonth() + 6, fechaOriginal.getDate());
   // Formatear la fecha calculada al formato deseado
@@ -78,15 +78,25 @@ export default function useMantenciones() {
   const semanas = Math.ceil(tiempoRestante / (1000 * 60 * 60 * 24 * 7));
   semanasRestantes.value = semanas;
 
-  if(semanasRestantes.value <= 1){
-  
+  console.log('semanasRestantes.value', semanasRestantes.value)
+
+  if(semanasRestantes.value <= 2){
     contactar.value = true
   }else {
-   
     contactar.value = false
   }
   return fechaFormateada;
 };
+
+const enviarWhatsapp = (numeroCliente, nombreCliente) => {
+  if(numeroCliente != '' && nombreCliente != ''){
+    const url = `https://api.whatsapp.com/send?phone=${numeroCliente}&text=Hola,%20${nombreCliente}%20no%20olvides%20que%20tu%20vehículo%20está%20próximo%20a%20necesitar%20una%20mantencíon%20hablemos !`;
+    window.open(url, '_blank');
+  } else {
+    return
+  }
+};
+
   return {
     calculoFechaProximaMantencion,
     filterItemsCollection,
@@ -94,9 +104,9 @@ export default function useMantenciones() {
     patente,
     deleteItem,
     nombre,
-    calculoKmProxMantencion,
-    contactarCliente,
     contactar,
-    semanasRestantes
+    semanasRestantes,
+    enviarWhatsapp,
+    usoFamiliar
   };
 }
