@@ -111,9 +111,9 @@ export default function useMantenciones() {
     const dataMail = {
       to: `${mailCliente}`,
       from: 'granrah1@gmail.com',
-      subject: 'Prueba desde front',
-      text: 'prueba de front',
-      html: '<a>HolA</a>'
+      subject: 'Tu vehículo esta próximo a necesitar una mantención',
+      text: 'Mantención de tu Vehículo!',
+      html: '<p>Hola!, soy Diego, realicé la mantención de tu auto hace un tiempo y te quería recordar que tu vehículo está próximo a necesitar una nueva mantención, hablemos, contactactame al: <br/> <b><a href="tel:+56999670451">+56999670451</a></b></p> <p>O bién respondeme este correo.</p><br/><p>Atte. Diego Tapia<p/><b><p>Ingeniero Mecánico<p/></b>'
     }
     try {
       const response = await axios.post('https://servernodemailer-production.up.railway.app/api/mail', dataMail).then(async (resp) => {
