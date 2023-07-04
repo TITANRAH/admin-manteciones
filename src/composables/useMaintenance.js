@@ -88,7 +88,7 @@ export default function useMantenciones() {
     if (semanasRestantes.value == 2) {
       contactar.value = true;
       if (contactarCliente.value == true && semanasRestantes.value == 2) {
-        sendMail(idDoc.value, mailCliente.value)
+       
       }
     } else {
       contactar.value = false
