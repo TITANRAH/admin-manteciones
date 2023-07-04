@@ -111,6 +111,7 @@ console.log('mantencion', mantencion)
 const docRef = await addDoc(collection(db, "mantenciones"), {
   ...mantencion,
   imagen: url.value,
+  contactarCliente: true
 });
 
 if (docRef.id) {

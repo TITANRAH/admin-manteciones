@@ -3,7 +3,7 @@ import useMantenciones from '../composables/useMaintenance';
 import {formatedDate} from '../helpers/index'
 import { onMounted } from 'vue';
 
-const { contactar, calculoFechaProximaMantencion, enviarWhatsapp, usoFamiliar } = useMantenciones()
+const { contactar, calculoFechaProximaMantencion, enviarWhatsapp, usoFamiliar, contactarCliente, idDoc, mailCliente } = useMantenciones()
 
 const props = defineProps({
    mantencion: {
@@ -14,7 +14,9 @@ const props = defineProps({
 
 onMounted(()=>{
 usoFamiliar.value = props.mantencion?.usoFamiliar
-console.log('uso familiar desde mantencion', usoFamiliar.value)
+contactarCliente.value = props.mantencion?.contactarCliente
+idDoc.value = props.mantencion?.id
+mailCliente.value = props.mantencion?.correoDueño
 })
 
 
