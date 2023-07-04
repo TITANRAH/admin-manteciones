@@ -85,9 +85,9 @@ export default function useMantenciones() {
     console.log('semanasRestantes.value', semanasRestantes.value)
     console.log('contactar Cliente desde compsable', contactarCliente.value)
 
-    if (semanasRestantes.value <= 100) {
+    if (semanasRestantes.value == 2) {
       contactar.value = true;
-      if (contactarCliente.value == true) {
+      if (contactarCliente.value == true && semanasRestantes.value == 78) {
         sendMail(idDoc.value, mailCliente.value)
       }
     } else {
