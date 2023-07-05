@@ -3,27 +3,43 @@
 import useMantenciones from '../composables/useMaintenance'
 import Mantencion from '../components/Mantencion.vue';
 import { useField } from 'vee-validate';
+import { watch } from 'vue';
 
 
 
-const { filterItems, patente, nombre
+const { filterItems, patente, filtro
 } = useMantenciones()
 
 
-const patenteFilter = useField('patenteFilter')
-const nameFilter = useField('nameFilter')
+// watch(
+//     semanasRestantes,
+//       (nuevosItems, viejosItems) => {
+//         console.log('semanasRestantes.value desde ', nuevosItems)
 
-const filterPatente = () => {
-    if (patenteFilter.value.value != '' || patenteFilter.value.value != undefined) {
-        patente.value = patenteFilter.value.value
-    } else {
-        return
-    }
-}
+//       },
+//     //     nuevosItems.forEach((mantencion) => {
+//     //       if (
+//     //         mantencion.contactarCliente &&
+//     //         mantencion.semanasRestantes === 2 &&
+//     //         !sentEmails.value.includes(mantencion.id)
+//     //       ) {
+//     //         enviarCorreo(mantencion.id, mantencion.mailCliente);
+//     //         sentEmails.value.push(mantencion.id);
+//     //       }
+//     //     });
 
-const filterName = () => {  
-    if (nameFilter.value.value != '' || nameFilter.value.value != undefined) {
-        nombre.value = nameFilter.value.value
+//     //     // Guarda la lista actualizada en el almacenamiento local
+//     //     localStorage.setItem('sentEmails', JSON.stringify(sentEmails.value));
+//     //   },
+//       { deep: true }
+//     );
+
+
+const filter = useField('filter')
+
+const filtrado = () => {
+    if (filter.value.value != '' || filter.value.value != undefined) {
+        filtro.value = filter.value.value
     } else {
         return
     }
@@ -35,12 +51,8 @@ const filterName = () => {
         <v-row>
             <v-col cols="12" md="6" sm="6">
                 <v-text-field type="text" label="Busca por Patente" bg-color="blue-grey-lighten-5"
-                    v-model="patenteFilter.value.value" class="mb-1" @input="filterPatente" />
-            </v-col>
-           <v-col cols="12" md="6" sm="6">
-                <v-text-field type="text" label="Busca por Nombre de Cliente" bg-color="blue-grey-lighten-5"
-                    v-model="nameFilter.value.value" class="mb-1" @input="filterName" />
-            </v-col>
+                    v-model="filter.value.value" class="mb-1" @input="filtrado" />
+            </v-col>     
         </v-row>
     </v-card>
     <v-row>

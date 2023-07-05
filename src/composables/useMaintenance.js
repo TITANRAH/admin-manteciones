@@ -6,8 +6,8 @@ import axios from 'axios';
 
 
 export default function useMantenciones() {
-  const patente = ref("");
-  const nombre = ref("");
+  const filtro = ref("");
+  
   const contactar = ref(false)
   const usoFamiliar = ref(0)
   const semanasRestantes = ref(0)
@@ -38,19 +38,14 @@ export default function useMantenciones() {
     }
   }
   const filterItems = computed(() => {
-    console.log("patente.value desde computed", patente.value);
+ 
 
-    if (patente.value != "" || nombre.value != "") {
-      if (nombre.value) {
+ if (filtro.value) {
         return mantencionesCollection.value.filter((mantencion) =>
-          mantencion.nombreDueño.toLowerCase().includes(nombre.value.toLowerCase())
-        );
-      } else if (patente.value) {
-        return mantencionesCollection.value.filter((mantencion) =>
-          mantencion.patenteVehiculo.toLowerCase().includes(patente.value.toLowerCase())
+          mantencion.patenteVehiculo.toLowerCase().includes(filtro.value.toLowerCase()) || mantencion.nombreDueño.toLowerCase().includes(filtro.value.toLowerCase())
         );
       }
-    } else {
+   else {
       return mantencionesCollection.value;
     }
   });
@@ -85,11 +80,11 @@ export default function useMantenciones() {
     console.log('semanasRestantes.value', semanasRestantes.value)
     console.log('contactar Cliente desde compsable', contactarCliente.value)
 
-    if (semanasRestantes.value == 2) {
+    if (semanasRestantes.value == 27) {
       contactar.value = true;
-      if (contactarCliente.value == true && semanasRestantes.value == 2) {
+      // if (contactarCliente.value == true && semanasRestantes.value == 2) {
        
-      }
+      // }
     } else {
       contactar.value = false
     }
@@ -118,7 +113,16 @@ export default function useMantenciones() {
     try {
       const response = await axios.post('https://servernodemailer-production.up.railway.app/api/mail', dataMail).then(async (resp) => {
         console.log('respuesta de servicio mail', resp)
-        // console.log('ID CLIENTE', idDoc)
+    
+      });
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+
+ const cambiarCampoAfalse = async () =>{
+    // console.log('ID CLIENTE', idDoc)
         // console.log('mail ciente', mailCliente)
         const docRef = doc(db, 'mantenciones', idDoc)
         // const mantencion = useDocument(docRef);
@@ -128,19 +132,14 @@ export default function useMantenciones() {
         await updateDoc(docRef, data).then(() => {
           // console.log(value)
         })
-      });
-    } catch (error) {
-      console.log(error)
-    }
-  }
+ }
 
   return {
     calculoFechaProximaMantencion,
     filterItemsCollection,
     filterItems,
-    patente,
     deleteItem,
-    nombre,
+    filtro,
     contactar,
     semanasRestantes,
     enviarWhatsapp,
