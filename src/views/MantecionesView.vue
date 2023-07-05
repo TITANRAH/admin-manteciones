@@ -50,7 +50,7 @@ const filtrado = () => {
     <v-card flat>
         <v-row>
             <v-col cols="12" md="6" sm="6">
-                <v-text-field type="text" label="Busca por Patente" bg-color="blue-grey-lighten-5"
+                <v-text-field type="text" label="Busca por Patente o por Nombre de Cliente" bg-color="blue-grey-lighten-5"
                     v-model="filter.value.value" class="mb-1" @input="filtrado" />
             </v-col>     
         </v-row>
