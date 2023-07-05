@@ -12,8 +12,6 @@ const auth = useFirebaseAuth();
   const authUser = ref(null);
   const router = useRouter()
 
-  console.log("authUser.value desde store", authUser.value);
-
   const errorCodes = {
     "auth/user-not-found": "Usuario no encontrado",
     "auth/wrong-password": "El password es incorrecto",

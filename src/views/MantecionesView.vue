@@ -3,37 +3,9 @@
 import useMantenciones from '../composables/useMaintenance'
 import Mantencion from '../components/Mantencion.vue';
 import { useField } from 'vee-validate';
-import { watch } from 'vue';
+import { } from 'vue';
 
-
-
-const { filterItems, patente, filtro
-} = useMantenciones()
-
-
-// watch(
-//     semanasRestantes,
-//       (nuevosItems, viejosItems) => {
-//         console.log('semanasRestantes.value desde ', nuevosItems)
-
-//       },
-//     //     nuevosItems.forEach((mantencion) => {
-//     //       if (
-//     //         mantencion.contactarCliente &&
-//     //         mantencion.semanasRestantes === 2 &&
-//     //         !sentEmails.value.includes(mantencion.id)
-//     //       ) {
-//     //         enviarCorreo(mantencion.id, mantencion.mailCliente);
-//     //         sentEmails.value.push(mantencion.id);
-//     //       }
-//     //     });
-
-//     //     // Guarda la lista actualizada en el almacenamiento local
-//     //     localStorage.setItem('sentEmails', JSON.stringify(sentEmails.value));
-//     //   },
-//       { deep: true }
-//     );
-
+const { filterItems, filtro} = useMantenciones()
 
 const filter = useField('filter')
 
@@ -52,14 +24,11 @@ const filtrado = () => {
             <v-col cols="12" md="6" sm="6">
                 <v-text-field type="text" label="Busca por Patente o por Nombre de Cliente" bg-color="blue-grey-lighten-5"
                     v-model="filter.value.value" class="mb-1" @input="filtrado" />
-            </v-col>     
+            </v-col>
         </v-row>
     </v-card>
     <v-row>
-        <Mantencion 
-                v-for="mantencion in filterItems" 
-                :key="mantencion.id" 
-                :mantencion="mantencion" />
+        <Mantencion v-for="mantencion in filterItems" :key="mantencion.id" :mantencion="mantencion" />
     </v-row>
 </template>
 
