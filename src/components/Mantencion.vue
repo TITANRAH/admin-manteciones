@@ -62,7 +62,7 @@ const calculoFechaProximaMantencion = () => {
 
       <v-card-item class="text-white mb-0 mt-0 py-0 ">
          <template v-slot:subtitle>
-            Última Mantención: {{ props.mantencion?.fechaMantencion }}
+            Última Mantención: {{ formatedDate(props.mantencion?.fechaMantencion) }}
          </template>
       </v-card-item>
 
