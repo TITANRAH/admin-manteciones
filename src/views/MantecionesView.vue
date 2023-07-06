@@ -16,6 +16,8 @@ const filtrado = () => {
         return
     }
 }
+
+
 </script>
 <template>
     <h1 class="text-indigo mb-10"> <v-icon color="indigo" icon="mdi-car-cog" class="mr-3"></v-icon>Mantenciones</h1>
