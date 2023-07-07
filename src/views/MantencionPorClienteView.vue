@@ -8,7 +8,6 @@ import { INITIAL_EVENTS, createEventId } from '../utils/event-utils';
 import { useRoute } from 'vue-router';
 import { doc } from 'firebase/firestore';
 import { useFirestore } from 'vuefire';
-
 const route = useRoute();
 const db = useFirestore(); 
 const docRef = doc(db, 'mantenciones', route.params.id);
@@ -41,7 +40,7 @@ const calendarOptions = reactive({
 const currentEvents = ref([]);
 
 function handleWeekendsToggle() {
-  calendarOptions.value.weekends = !calendarOptions.value.weekends;
+  calendarOptions.weekends = !calendarOptions.weekends;
 }
 
 function handleDateSelect(selectInfo) {
