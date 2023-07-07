@@ -1,8 +1,8 @@
-import { collection, doc, deleteDoc, updateDoc } from "firebase/firestore";
-import { computed, ref } from "vue";
-import { useFirestore, useCollection, useFirebaseStorage, useDocument } from "vuefire";
-import { ref as storageRef, deleteObject } from "firebase/storage";
 import axios from 'axios';
+import { collection, deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { deleteObject, ref as storageRef } from "firebase/storage";
+import { computed, ref } from "vue";
+import { useCollection, useFirebaseStorage, useFirestore } from "vuefire";
 
 export default function useMantenciones() {
 
@@ -53,8 +53,10 @@ export default function useMantenciones() {
 
 
   const enviarWhatsapp = (numeroCliente, nombreCliente) => {
+
+    console.log('numero', numeroCliente)
     if (numeroCliente != '' && nombreCliente != '') {
-      const url = `https://api.whatsapp.com/send?phone=${numeroCliente}&text=Hola,%20${nombreCliente}%20no%20olvides%20que%20tu%20vehículo%20está%20próximo%20a%20necesitar%20una%20mantencíon%20hablemos !`;
+      const url = `https://api.whatsapp.com/send?phone=${numeroCliente}&text=Hola,%20${nombreCliente}%20no%20olvides%20que%20tu%20vehículo%20está%20próximo%20a%20necesitara%20una%20mantencíon%20, hablemos!`;
       window.open(url, '_blank');
     } else {
       return
