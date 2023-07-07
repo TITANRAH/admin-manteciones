@@ -57,7 +57,7 @@ export default function useMantenciones() {
     console.log('numero', numeroCliente)
     if (numeroCliente != '' && nombreCliente != '') {
       const url = `https://api.whatsapp.com/send?phone=${numeroCliente}&text=Hola,%20${nombreCliente}%20no%20olvides%20que%20tu%20vehículo%20está%20próximo%20a%20necesitara%20una%20mantencíon%20, hablemos!`;
-      window.open(url, '_blank');
+      window.location.href = url;
     } else {
       return
     }
