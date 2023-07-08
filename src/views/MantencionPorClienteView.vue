@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, computed, watch } from 'vue';
 import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -18,13 +18,19 @@ const mantencionId = route.params.id;
 const mantencionesCollectionRef = collection(db, 'mantenciones');
 const mantencionRef = doc(mantencionesCollectionRef, mantencionId);
 const mantencion = useDocument(mantencionRef)//
+const eventosCollectionRef = collection(db, 'mantenciones', mantencionId, 'eventos');
+const currentEvents = ref([]);
+const modalOpen = ref(false);
+const eventTitle = ref('');
+const eventDescription = ref('');
+const selectInfo = ref(null); // Agrega esta línea para declarar la variable selectInfo
+const eventModalOpen = ref(false);
+const selectedEvent = ref(null);
+const eventos = ref([])
 
 
 
-
-
-
-const calendarOptions = reactive({
+const calendarOptions = computed(() => ({
   longPressDelay: 0,
   locale: 'es',
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
@@ -34,7 +40,8 @@ const calendarOptions = reactive({
     right: 'dayGridMonth,timeGridWeek,timeGridDay',
   },
   initialView: 'dayGridMonth',
-  initialEvents: INITIAL_EVENTS,
+  initialEvents: currentEvents.value,
+  events:currentEvents,
   editable: true,
   selectable: true,
   selectMirror: true,
@@ -43,15 +50,31 @@ const calendarOptions = reactive({
   select: handleDateSelect,
   eventClick: handleEventClick,
   eventsSet: handleEvents,
-});
+}));
 
-const currentEvents = ref([]);
-const modalOpen = ref(false);
-const eventTitle = ref('');
-const eventDescription = ref('');
-const selectInfo = ref(null); // Agrega esta línea para declarar la variable selectInfo
-const eventModalOpen = ref(false);
-const selectedEvent = ref(null);
+onMounted(async () => {
+  const eventosQuerySnapshot = await getDocs(eventosCollectionRef);
+  
+  eventosQuerySnapshot.forEach((doc) => {
+    const evento = {
+      id: doc.data().id,
+      title: doc.data().title,
+      start: doc.data().start,
+      end: doc.data().end,
+      allDay: doc.data().allDay,
+      extendedProps: {
+        descripcion: doc.data().value,
+      },
+    };
+    eventos.value.push(evento);
+  });
+
+  currentEvents.value = eventos.value;
+
+  
+
+  console.log('eventos', eventos.value)
+});
 
 
 
@@ -167,22 +190,30 @@ function handleEvents(events) {
         <h2>Todos los Eventos ({{ currentEvents.length }})</h2>
         <ul>
           <li v-for='event in currentEvents' :key='event.id'>
-            <b>{{ event.startStr }}</b>
+            <b>{{ event.startStr  }}</b>
             <i>{{ event.title }}</i>
           </li>
+          
         </ul>
       </div>
     </div>
     <div class='demo-app-main'>
-      <FullCalendar
-        class='demo-app-calendar'
-        :options='calendarOptions'
-      >
-        <template v-slot:eventContent='arg'>
-          <b>{{ arg.timeText }}</b>
-          <i>{{ arg.event.title }}</i>
-        </template>
-      </FullCalendar>
+
+      <keep-alive>
+        
+        <FullCalendar
+          class='demo-app-calendar'
+          :options='calendarOptions'
+          
+        >
+          <template v-slot:eventContent='arg'>
+            <b>{{ arg.timeText }}</b>
+            <i>{{ arg.event.title }}</i>
+          </template>
+  
+          
+        </FullCalendar>
+      </keep-alive>
     </div>
 
     
