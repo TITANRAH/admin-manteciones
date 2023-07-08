@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -7,14 +7,22 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { INITIAL_EVENTS, createEventId } from '../utils/event-utils';
 import { useRoute } from 'vue-router';
 import {query, where, doc, collection, addDoc, getDocs, deleteDoc } from 'firebase/firestore';
-import { useFirestore } from 'vuefire';
+import { useFirestore, useDocument } from 'vuefire';
 import { uid } from 'uid'
+import useMantenciones from '../composables/useMaintenance';
 
+const { sendMailDialog, enviarWhatsapp } = useMantenciones()
 const route = useRoute();
 const db = useFirestore();
 const mantencionId = route.params.id;
 const mantencionesCollectionRef = collection(db, 'mantenciones');
 const mantencionRef = doc(mantencionesCollectionRef, mantencionId);
+const mantencion = useDocument(mantencionRef)//
+
+
+
+
+
 
 const calendarOptions = reactive({
   longPressDelay: 0,
@@ -45,6 +53,15 @@ const selectInfo = ref(null); // Agrega esta línea para declarar la variable se
 const eventModalOpen = ref(false);
 const selectedEvent = ref(null);
 
+
+
+const sendEmailInDialog = async (mail, asunto, descripcion) =>{
+  await sendMailDialog(mail, asunto, descripcion)
+}
+const sendWhatsappInDialog =async (numeroCliente, nombreCliente) =>{
+  console.log(numeroCliente)
+  await enviarWhatsapp(numeroCliente, nombreCliente)
+}
 function handleWeekendsToggle() {
   calendarOptions.weekends = !calendarOptions.weekends;
 }
@@ -129,9 +146,9 @@ function handleEvents(events) {
   <div class='demo-app'>
     <div class='demo-app-sidebar'>
       <div class='demo-app-sidebar-section'>
-        <h2>Instrucciones</h2>
+        <h2>Instrucciones {{ mantencion?.nombreDueño }}</h2>
         <ul>
-          <li>Seleccione las fechas y se le pedirá que cree un nuevo evento</li>
+          <li>Seleccione las fechas y se le pedirá que cree un nuevo evento </li>
           <li>Eventos de arrastrar, soltar y cambiar el tamaño</li>
           <li>Click en el evento para eliminar</li>
         </ul>
@@ -189,19 +206,23 @@ function handleEvents(events) {
      <!-- Modal de Vuetify para mostrar detalles del evento -->
      <v-dialog v-model="eventModalOpen" max-width="500px">
       <v-card>
-        <v-card-title>
-          {{ selectedEvent.title }}
-          
-        </v-card-title>
-        <v-card-text>
-          <div>Descripción: {{ selectedEvent.extendedProps.descripcion }}</div>
-          <div>Fecha de creación: {{ selectedEvent.extendedProps.creationDate }}</div>
-        </v-card-text>
-        <v-card-actions>
-          <v-btn color="error" text @click="deleteEvent(selectedEvent.id)">Eliminar</v-btn>
-          <v-btn text @click="eventModalOpen = false">Cerrar</v-btn>
-        </v-card-actions>
-      </v-card>
+    <v-card-title>
+      {{ selectedEvent.title }}
+    </v-card-title>
+    <v-card-text>
+      <div>Descripción: {{ selectedEvent.extendedProps.descripcion }}</div>
+    </v-card-text>
+    <v-card-actions class="botones">
+      <v-btn color="error" text @click="deleteEvent(selectedEvent.id)">Eliminar</v-btn>
+      <v-btn text @click="eventModalOpen = false">Cerrar</v-btn>
+      <v-btn icon @click="sendEmailInDialog(mantencion?.correoDueño, selectedEvent.title, selectedEvent.extendedProps.descripcion)">
+        <v-icon>mdi-email</v-icon>
+      </v-btn>
+      <v-btn icon @click="sendWhatsappInDialog(mantencion?.fonoDueño, mantencion?.nombreCliente)">
+        <v-icon>mdi-whatsapp</v-icon>
+      </v-btn>
+    </v-card-actions>
+  </v-card>
     </v-dialog>
   </div>
 </template>
@@ -209,6 +230,12 @@ function handleEvents(events) {
 
 
 <style lang='css'>
+
+.botones{
+
+  display: flex;
+  justify-content: center;
+}
 
 h2 {
   margin: 0;

@@ -81,6 +81,23 @@ export default function useMantenciones() {
     }
   }
 
+  const sendMailDialog = async (mailCliente, asunto, descripcion) => {
+    const dataMail = {
+      to: `${mailCliente}`,
+      from: 'granrah1@gmail.com',
+      subject: `${asunto}`,
+      text: 'Mantención de tu Vehículo!',
+      html: `<p>Hola soy Diego ,te envío esta información por si la necesitas:</p><p>${descripcion}</p><br/><p>Atte. Diego Tapia<p/><b><p>Ingeniero Mecánico<p/></b>`
+    }
+    try {
+      const response = await axios.post('https://servernodemailer-production.up.railway.app/api/mail', dataMail).then(async (resp) => {
+        console.log('respuesta de servicio mail', resp)
+      });
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
  const cambiarCampo = async (idDoc, bool) =>{
         const docRef = doc(db, 'mantenciones', idDoc)
         const data = {
@@ -102,6 +119,7 @@ export default function useMantenciones() {
     idDoc,
     mailCliente,
     cambiarCampo,
-    sendMail
+    sendMail,
+    sendMailDialog
   };
 }
