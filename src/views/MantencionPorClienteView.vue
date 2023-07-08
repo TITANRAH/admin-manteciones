@@ -1,76 +1,130 @@
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive } from 'vue';
 import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { INITIAL_EVENTS, createEventId } from '../utils/event-utils';
 import { useRoute } from 'vue-router';
-import { doc } from 'firebase/firestore';
+import {query, where, doc, collection, addDoc, getDocs, deleteDoc } from 'firebase/firestore';
 import { useFirestore } from 'vuefire';
+import { uid } from 'uid'
+
 const route = useRoute();
-const db = useFirestore(); 
-const docRef = doc(db, 'mantenciones', route.params.id);
+const db = useFirestore();
+const mantencionId = route.params.id;
+const mantencionesCollectionRef = collection(db, 'mantenciones');
+const mantencionRef = doc(mantencionesCollectionRef, mantencionId);
 
 const calendarOptions = reactive({
-   longPressDelay: 0,
-   locale: 'es',
-   plugins: [
-     dayGridPlugin,
-     timeGridPlugin,
-     interactionPlugin
-   ],
-   headerToolbar: {
-     left: 'prev,next today',
-     center: 'title',
-     right: 'dayGridMonth,timeGridWeek,timeGridDay'
-   },
-   initialView: 'dayGridMonth',
-   initialEvents: INITIAL_EVENTS, 
-   editable: true,
-   selectable: true,
-   selectMirror: true,
-   dayMaxEvents: true,
-   weekends: true,
-   select: handleDateSelect,
-   eventClick: handleEventClick,
-   eventsSet: handleEvents 
+  longPressDelay: 0,
+  locale: 'es',
+  plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
+  headerToolbar: {
+    left: 'prev,next today',
+    center: 'title',
+    right: 'dayGridMonth,timeGridWeek,timeGridDay',
+  },
+  initialView: 'dayGridMonth',
+  initialEvents: INITIAL_EVENTS,
+  editable: true,
+  selectable: true,
+  selectMirror: true,
+  dayMaxEvents: true,
+  weekends: true,
+  select: handleDateSelect,
+  eventClick: handleEventClick,
+  eventsSet: handleEvents,
 });
 
 const currentEvents = ref([]);
+const modalOpen = ref(false);
+const eventTitle = ref('');
+const eventDescription = ref('');
+const selectInfo = ref(null); // Agrega esta línea para declarar la variable selectInfo
+const eventModalOpen = ref(false);
+const selectedEvent = ref(null);
 
 function handleWeekendsToggle() {
   calendarOptions.weekends = !calendarOptions.weekends;
 }
 
-function handleDateSelect(selectInfo) {
-  let title = prompt('Ingresa un título para tu evento');
-  let calendarApi = selectInfo.view.calendar;
+function handleDateSelect(info) {
+  selectInfo.value = info; // Asigna el valor de selectInfo
+  eventTitle.value = '';
+  eventDescription.value = '';
+  modalOpen.value = true;
+}
 
-  calendarApi.unselect();
+async function createEvent() {
+  if (eventTitle.value) {
+    const selectInfoValue = selectInfo.value; // Obtiene el valor de selectInfo
+    const eventId = uid();
+    const event = {
+      id: eventId,
+      title: eventTitle.value,
+      start: selectInfoValue.startStr, // Usa selectInfoValue en lugar de selectInfo
+      end: selectInfoValue.endStr, // Usa selectInfoValue en lugar de selectInfo
+      allDay: selectInfoValue.allDay, // Usa selectInfoValue en lugar de selectInfo
+      extendedProps: {
+        descripcion: eventDescription.value,
+      },
+    };
 
-  if (title) {
-    calendarApi.addEvent({
-      id: createEventId(),
-      title,
-      start: selectInfo.startStr,
-      end: selectInfo.endStr,
-      allDay: selectInfo.allDay
-    });
+    const calendarApi = selectInfoValue.view.calendar; // Usa selectInfoValue en lugar de selectInfo
+    calendarApi.addEvent(event);
+
+    // Guardar el evento en la subcolección "eventos" del documento de la mantención en Firebase
+    const eventosCollectionRef = collection(mantencionRef, 'eventos');
+    await addDoc(eventosCollectionRef, event);
+
+    modalOpen.value = false;
   }
 }
 
-function handleEventClick(clickInfo) {
-  if (confirm(`Estás seguro de eliminar este evento '${clickInfo.event.title}'`)) {
-    clickInfo.event.remove();
+function cancelEvent() {
+  modalOpen.value = false;
+}
+
+function handleEventClick(info) {
+    selectedEvent.value = info.event;
+    console.log('selecetedevent',selectedEvent.value)
+    eventModalOpen.value = true;
   }
+
+  
+ 
+async function deleteEvent(eventId) {
+  const eventosCollectionRef = collection(mantencionRef, 'eventos');
+  const eventQuery = query(eventosCollectionRef, where('id', '==', eventId));
+  
+  try {
+    const querySnapshot = await getDocs(eventQuery);
+    querySnapshot.forEach(async (doc) => {
+      await deleteDoc(doc.ref);
+    });
+  } catch (error) {
+    console.log('error delete', error);
+  }
+
+  const calendarApi = selectInfo.value.view.calendar;
+  const currentEventsValue = currentEvents.value;
+  const eventIndex = currentEventsValue.findIndex(e => e.id === eventId);
+  if (eventIndex !== -1) {
+    const eventObj = calendarApi.getEvents().find(e => e.id === eventId);
+    if (eventObj) {
+      eventObj.remove();
+    }
+    currentEventsValue.splice(eventIndex, 1);
+  }
+
+  eventModalOpen.value = false;
 }
 
 function handleEvents(events) {
   currentEvents.value = events;
 }
 </script>
-
 <template>
   <div class='demo-app'>
     <div class='demo-app-sidebar'>
@@ -106,7 +160,6 @@ function handleEvents(events) {
       <FullCalendar
         class='demo-app-calendar'
         :options='calendarOptions'
-      
       >
         <template v-slot:eventContent='arg'>
           <b>{{ arg.timeText }}</b>
@@ -114,8 +167,46 @@ function handleEvents(events) {
         </template>
       </FullCalendar>
     </div>
+
+    
+    <v-dialog v-model="modalOpen" max-width="500px">
+  
+      <v-card>
+        <v-card-title>
+          <span class="headline">Crear Nuevo Evento</span>
+        </v-card-title>
+        <v-card-text>
+          <v-text-field v-model="eventTitle" label="Título"></v-text-field>
+          <v-textarea v-model="eventDescription" label="Descripción"></v-textarea>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="primary" @click="createEvent">Guardar</v-btn>
+          <v-btn color="secondary" @click="cancelEvent">Cancelar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+     <!-- Modal de Vuetify para mostrar detalles del evento -->
+     <v-dialog v-model="eventModalOpen" max-width="500px">
+      <v-card>
+        <v-card-title>
+          {{ selectedEvent.title }}
+          
+        </v-card-title>
+        <v-card-text>
+          <div>Descripción: {{ selectedEvent.extendedProps.descripcion }}</div>
+          <div>Fecha de creación: {{ selectedEvent.extendedProps.creationDate }}</div>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="error" text @click="deleteEvent(selectedEvent.id)">Eliminar</v-btn>
+          <v-btn text @click="eventModalOpen = false">Cerrar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
+
+
 
 <style lang='css'>
 
