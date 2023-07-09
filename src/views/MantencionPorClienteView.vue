@@ -26,7 +26,7 @@ const eventDescription = ref('');
 const selectInfo = ref(null); // Agrega esta línea para declarar la variable selectInfo
 const eventModalOpen = ref(false);
 const selectedEvent = ref(null);
-const eventos = ref([])
+
 
 
 
@@ -56,28 +56,28 @@ const calendarOptions = computed(() => ({
 
 const fetchEvents = async () => {
   const eventosQuerySnapshot = await getDocs(eventosCollectionRef);
-  const events = [];
+  const events = ref([])
 
   eventosQuerySnapshot.forEach((doc) => {
     const evento = {
       id: doc.data().id,
       title: doc.data().title,
-      start: new Date(doc.data().start), // Convertir la fecha a objeto Date
-      end: new Date(doc.data().end), // Convertir la fecha a objeto Date
+      start: doc.data().start, // Convertir la fecha a objeto Date
+      end: doc.data().end, // Convertir la fecha a objeto Date
       allDay: doc.data().allDay,
       extendedProps: {
         descripcion: doc.data().value,
       },
     };
-    events.push(evento);
+    events.value.push(evento);
   });
 
-  console.log('Eventos recuperados:', events); 
+  console.log('Eventos recuperados:', events.value); 
 
-  calendarOptions.value.events = events;
+  calendarOptions.value.events = events.value;
 };
 
-onMounted(fetchEvents);
+onMounted(()=>fetchEvents());
 
 
 
