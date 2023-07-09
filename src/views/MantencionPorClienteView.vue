@@ -30,6 +30,7 @@ const eventos = ref([])
 
 
 
+
 const calendarOptions = computed(() => ({
   longPressDelay: 0,
   locale: 'es',
@@ -40,8 +41,8 @@ const calendarOptions = computed(() => ({
     right: 'dayGridMonth,timeGridWeek,timeGridDay',
   },
   initialView: 'dayGridMonth',
-  initialEvents: currentEvents.value,
-  events:currentEvents,
+  initialEvents: computed(() => currentEvents.value),
+  events: computed(() => currentEvents.value),
   editable: true,
   selectable: true,
   selectMirror: true,
@@ -52,29 +53,31 @@ const calendarOptions = computed(() => ({
   eventsSet: handleEvents,
 }));
 
-onMounted(async () => {
+
+const fetchEvents = async () => {
   const eventosQuerySnapshot = await getDocs(eventosCollectionRef);
-  
+  const events = [];
+
   eventosQuerySnapshot.forEach((doc) => {
     const evento = {
       id: doc.data().id,
       title: doc.data().title,
-      start: doc.data().start,
-      end: doc.data().end,
+      start: new Date(doc.data().start), // Convertir la fecha a objeto Date
+      end: new Date(doc.data().end), // Convertir la fecha a objeto Date
       allDay: doc.data().allDay,
       extendedProps: {
         descripcion: doc.data().value,
       },
     };
-    eventos.value.push(evento);
+    events.push(evento);
   });
 
-  currentEvents.value = eventos.value;
+  console.log('Eventos recuperados:', events); 
 
-  
+  calendarOptions.value.events = events;
+};
 
-  console.log('eventos', eventos.value)
-});
+onMounted(fetchEvents);
 
 
 
@@ -135,6 +138,8 @@ function handleEventClick(info) {
   
  
 async function deleteEvent(eventId) {
+
+  console.log(' id a eliminar', eventId)
   const eventosCollectionRef = collection(mantencionRef, 'eventos');
   const eventQuery = query(eventosCollectionRef, where('id', '==', eventId));
   
