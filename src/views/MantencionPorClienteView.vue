@@ -28,6 +28,7 @@ const eventModalOpen = ref(false);
 const selectedEvent = ref(null);
 // const weekends = ref(false)
 const initialEvents = ref([])
+const calendarRef = ref(null); 
 
 const fetchEvents = async () => {
   const eventosCollectionRef = collection(db, 'mantenciones', mantencionId, 'eventos');
@@ -51,7 +52,7 @@ const fetchEvents = async () => {
   initialEvents.value = events.value;
 };
 
-onMounted(() => { fetchEvents() });
+onMounted(async() => { await fetchEvents() });
 
 const calendarOptions = computed(() => ({
   longPressDelay: 0,
@@ -129,8 +130,6 @@ function handleEventClick(info) {
 }
 
 async function deleteEvent(eventId) {
-
-  console.log(' id a eliminar', eventId)
   const eventosCollectionRef = collection(mantencionRef, 'eventos');
   const eventQuery = query(eventosCollectionRef, where('id', '==', eventId));
 
@@ -143,11 +142,12 @@ async function deleteEvent(eventId) {
     console.log('error delete', error);
   }
 
-  const calendarApi = selectInfo.value.view.calendar;
+  const calendarApi = calendarRef.value.getApi(); // Acceder a la instancia del calendario utilizando calendarRef.value
+
   const currentEventsValue = currentEvents.value;
   const eventIndex = currentEventsValue.findIndex(e => e.id === eventId);
   if (eventIndex !== -1) {
-    const eventObj = calendarApi.getEvents().find(e => e.id === eventId);
+    const eventObj = calendarApi.getEventById(eventId);
     if (eventObj) {
       eventObj.remove();
     }
@@ -156,7 +156,6 @@ async function deleteEvent(eventId) {
 
   eventModalOpen.value = false;
 }
-
 function handleEvents(events) {
   currentEvents.value = events;
 }
@@ -189,7 +188,7 @@ function handleEvents(events) {
 
       <keep-alive>
 
-        <FullCalendar class='demo-app-calendar' :options='calendarOptions'>
+        <FullCalendar class='demo-app-calendar' :options='calendarOptions' ref="calendarRef">
           <template v-slot:eventContent='arg'>
             <b>{{ arg.timeText }}</b>
             <i>{{ arg.event.title }}</i>
