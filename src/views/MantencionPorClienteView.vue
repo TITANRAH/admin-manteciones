@@ -1,15 +1,16 @@
 <script setup>
-import { ref, reactive, onMounted, computed, watch } from 'vue';
+import { ref, reactive, onMounted, computed, watch, onBeforeMount, onBeforeUpdate, onUpdated } from 'vue';
 import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { INITIAL_EVENTS, createEventId } from '../utils/event-utils';
 import { useRoute } from 'vue-router';
-import {query, where, doc, collection, addDoc, getDocs, deleteDoc } from 'firebase/firestore';
+import { query, where, doc, collection, addDoc, getDocs, deleteDoc } from 'firebase/firestore';
 import { useFirestore, useDocument } from 'vuefire';
 import { uid } from 'uid'
 import useMantenciones from '../composables/useMaintenance';
+import { formatedDate } from '../helpers/index'
 
 const { sendMailDialog, enviarWhatsapp } = useMantenciones()
 const route = useRoute();
@@ -18,7 +19,6 @@ const mantencionId = route.params.id;
 const mantencionesCollectionRef = collection(db, 'mantenciones');
 const mantencionRef = doc(mantencionesCollectionRef, mantencionId);
 const mantencion = useDocument(mantencionRef)//
-const eventosCollectionRef = collection(db, 'mantenciones', mantencionId, 'eventos');
 const currentEvents = ref([]);
 const modalOpen = ref(false);
 const eventTitle = ref('');
@@ -26,35 +26,12 @@ const eventDescription = ref('');
 const selectInfo = ref(null); // Agrega esta línea para declarar la variable selectInfo
 const eventModalOpen = ref(false);
 const selectedEvent = ref(null);
-
-
-
-
-
-const calendarOptions = computed(() => ({
-  longPressDelay: 0,
-  locale: 'es',
-  plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
-  headerToolbar: {
-    left: 'prev,next today',
-    center: 'title',
-    right: 'dayGridMonth,timeGridWeek,timeGridDay',
-  },
-  initialView: 'dayGridMonth',
-  initialEvents: computed(() => currentEvents.value),
-  events: computed(() => currentEvents.value),
-  editable: true,
-  selectable: true,
-  selectMirror: true,
-  dayMaxEvents: true,
-  weekends: true,
-  select: handleDateSelect,
-  eventClick: handleEventClick,
-  eventsSet: handleEvents,
-}));
+const weekends = ref(false)
+const initialEvents = ref([])
 
 
 const fetchEvents = async () => {
+  const eventosCollectionRef = collection(db, 'mantenciones', mantencionId, 'eventos');
   const eventosQuerySnapshot = await getDocs(eventosCollectionRef);
   const events = ref([])
 
@@ -72,25 +49,64 @@ const fetchEvents = async () => {
     events.value.push(evento);
   });
 
-  console.log('Eventos recuperados:', events.value); 
+  console.log('Eventos recuperados:', events.value);
 
   calendarOptions.value.events = events.value;
+  initialEvents.value = events.value;
+
 };
 
-onMounted(()=>fetchEvents());
 
 
 
-const sendEmailInDialog = async (mail, asunto, descripcion) =>{
+onMounted(() => { fetchEvents() });
+
+// onBeforeUpdate(() => {fetchEvents()
+//       console.log('Antes de actualizar el componente');
+//     });
+
+// onUpdated(fetchEvents);
+
+
+const calendarOptions = computed(() => ({
+  longPressDelay: 0,
+  locale: 'es',
+  plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
+  headerToolbar: {
+    left: 'prev,next today',
+    center: 'title',
+    right: 'dayGridMonth,timeGridWeek,timeGridDay',
+  },
+  initialView: 'dayGridMonth',
+  initialEvents: initialEvents,
+  events: initialEvents,
+  editable: true,
+  selectable: true,
+  selectMirror: true,
+  dayMaxEvents: true,
+  weekends: true,
+  select: handleDateSelect,
+  eventClick: handleEventClick,
+  eventsSet: handleEvents,
+}));
+
+
+
+
+
+
+
+
+const sendEmailInDialog = async (mail, asunto, descripcion) => {
   await sendMailDialog(mail, asunto, descripcion)
 }
-const sendWhatsappInDialog =async (numeroCliente, nombreCliente) =>{
+const sendWhatsappInDialog = async (numeroCliente, nombreCliente) => {
   console.log(numeroCliente)
   await enviarWhatsapp(numeroCliente, nombreCliente)
 }
-function handleWeekendsToggle() {
-  calendarOptions.weekends = !calendarOptions.weekends;
-}
+// function handleWeekendsToggle() {
+//   weekends.value = !weekends.weekends;
+// }
 
 function handleDateSelect(info) {
   selectInfo.value = info; // Asigna el valor de selectInfo
@@ -130,19 +146,25 @@ function cancelEvent() {
 }
 
 function handleEventClick(info) {
-    selectedEvent.value = info.event;
-    console.log('selecetedevent',selectedEvent.value)
-    eventModalOpen.value = true;
-  }
+  selectedEvent.value = info.event;
+  console.log('selecetedevent', selectedEvent.value)
+  eventModalOpen.value = true;
+}
 
-  
- 
+
+const handleToogle = () => {
+
+
+}
+
+
+
 async function deleteEvent(eventId) {
 
   console.log(' id a eliminar', eventId)
   const eventosCollectionRef = collection(mantencionRef, 'eventos');
   const eventQuery = query(eventosCollectionRef, where('id', '==', eventId));
-  
+
   try {
     const querySnapshot = await getDocs(eventQuery);
     querySnapshot.forEach(async (doc) => {
@@ -176,54 +198,42 @@ function handleEvents(events) {
       <div class='demo-app-sidebar-section'>
         <h2>Instrucciones {{ mantencion?.nombreDueño }}</h2>
         <ul>
-          <li>Seleccione las fechas y se le pedirá que cree un nuevo evento </li>
+          <li>Selecciona las fechas y se te pedirá que crees un nuevo evento </li>
           <li>Eventos de arrastrar, soltar y cambiar el tamaño</li>
-          <li>Click en el evento para eliminar</li>
+          <li>Click en el evento para eliminar o visualizar</li>
+          <li>Click en el evento para contactar al Cliente, por correo o Whatsapp</li>
         </ul>
       </div>
-      <div class='demo-app-sidebar-section'>
-        <label>
-          <input
-            type='checkbox'
-            :checked='calendarOptions.weekends'
-            @change='handleWeekendsToggle'
-          />
-          cambia a semanas
-        </label>
-      </div>
+
+
       <div class='demo-app-sidebar-section'>
         <h2>Todos los Eventos ({{ currentEvents.length }})</h2>
-        <ul>
+        <ul class="eventos">
           <li v-for='event in currentEvents' :key='event.id'>
-            <b>{{ event.startStr  }}</b>
+            <b>{{ formatedDate(event.startStr) }}</b>
             <i>{{ event.title }}</i>
           </li>
-          
         </ul>
       </div>
     </div>
     <div class='demo-app-main'>
 
       <keep-alive>
-        
-        <FullCalendar
-          class='demo-app-calendar'
-          :options='calendarOptions'
-          
-        >
+
+        <FullCalendar class='demo-app-calendar' :options='calendarOptions'>
           <template v-slot:eventContent='arg'>
             <b>{{ arg.timeText }}</b>
             <i>{{ arg.event.title }}</i>
           </template>
-  
-          
+
+
         </FullCalendar>
       </keep-alive>
     </div>
 
-    
+
     <v-dialog v-model="modalOpen" max-width="500px">
-  
+
       <v-card>
         <v-card-title>
           <span class="headline">Crear Nuevo Evento</span>
@@ -239,26 +249,27 @@ function handleEvents(events) {
       </v-card>
     </v-dialog>
 
-     <!-- Modal de Vuetify para mostrar detalles del evento -->
-     <v-dialog v-model="eventModalOpen" max-width="500px">
+    <!-- Modal de Vuetify para mostrar detalles del evento -->
+    <v-dialog v-model="eventModalOpen" max-width="500px">
       <v-card>
-    <v-card-title>
-      {{ selectedEvent.title }}
-    </v-card-title>
-    <v-card-text>
-      <div>Descripción: {{ selectedEvent.extendedProps.descripcion }}</div>
-    </v-card-text>
-    <v-card-actions class="botones">
-      <v-btn color="error" text @click="deleteEvent(selectedEvent.id)">Eliminar</v-btn>
-      <v-btn text @click="eventModalOpen = false">Cerrar</v-btn>
-      <v-btn icon @click="sendEmailInDialog(mantencion?.correoDueño, selectedEvent.title, selectedEvent.extendedProps.descripcion)">
-        <v-icon>mdi-email</v-icon>
-      </v-btn>
-      <v-btn icon @click="sendWhatsappInDialog(mantencion?.fonoDueño, mantencion?.nombreCliente)">
-        <v-icon>mdi-whatsapp</v-icon>
-      </v-btn>
-    </v-card-actions>
-  </v-card>
+        <v-card-title>
+          {{ selectedEvent.title }}
+        </v-card-title>
+        <v-card-text>
+          <div>Descripción: {{ selectedEvent.extendedProps.descripcion }}</div>
+        </v-card-text>
+        <v-card-actions class="botones">
+          <v-btn color="error" text @click="deleteEvent(selectedEvent.id)">Eliminar</v-btn>
+          <v-btn text @click="eventModalOpen = false">Cerrar</v-btn>
+          <v-btn icon
+            @click="sendEmailInDialog(mantencion?.correoDueño, selectedEvent.title, selectedEvent.extendedProps.descripcion)">
+            <v-icon>mdi-email</v-icon>
+          </v-btn>
+          <v-btn icon @click="sendWhatsappInDialog(mantencion?.fonoDueño, mantencion?.nombreCliente)">
+            <v-icon>mdi-whatsapp</v-icon>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
     </v-dialog>
   </div>
 </template>
@@ -266,8 +277,7 @@ function handleEvents(events) {
 
 
 <style lang='css'>
-
-.botones{
+.botones {
 
   display: flex;
   justify-content: center;
@@ -288,7 +298,8 @@ li {
   padding: 0;
 }
 
-b { /* used for event dates/times */
+b {
+  /* used for event dates/times */
   margin-right: 3px;
 }
 
@@ -310,12 +321,18 @@ b { /* used for event dates/times */
   padding: 2em;
 }
 
+.eventos{
+  max-height: 20rem;
+  overflow-y:auto;
+}
+
 .demo-app-main {
   flex-grow: 1;
   padding: 3em;
 }
 
-.fc { /* the calendar root */
+.fc {
+  /* the calendar root */
   max-width: 1100px;
   margin: 0 auto;
 }
@@ -324,23 +341,23 @@ b { /* used for event dates/times */
   .demo-app {
     flex-direction: column;
   }
-  
+
   .demo-app-sidebar {
     width: 100%;
     border-right: none;
     border-bottom: 1px solid #d3e2e8;
     order: 1;
   }
-  
+
   .demo-app-main {
     width: 100%;
     padding: 1em;
   }
 
   .demo-app-sidebar {
-   order: 2;
+    order: 2;
   }
-  
+
   .fc {
     max-width: none;
   }
@@ -354,19 +371,17 @@ b { /* used for event dates/times */
   }
 
   .fc .fc-toolbar-chunk {
-   
+
     max-width: 100%;
   }
 
-  .fc .fc-button-group > *:first-child {
+  .fc .fc-button-group>*:first-child {
     margin-left: 0;
   }
 
   .fc .fc-button {
     font-size: 0.75em;
   }
-  
+
 }
-
-
 </style>
