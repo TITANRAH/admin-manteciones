@@ -26,9 +26,8 @@ const eventDescription = ref('');
 const selectInfo = ref(null); // Agrega esta línea para declarar la variable selectInfo
 const eventModalOpen = ref(false);
 const selectedEvent = ref(null);
-const weekends = ref(false)
+// const weekends = ref(false)
 const initialEvents = ref([])
-
 
 const fetchEvents = async () => {
   const eventosCollectionRef = collection(db, 'mantenciones', mantencionId, 'eventos');
@@ -48,25 +47,11 @@ const fetchEvents = async () => {
     };
     events.value.push(evento);
   });
-
-  console.log('Eventos recuperados:', events.value);
-
   calendarOptions.value.events = events.value;
   initialEvents.value = events.value;
-
 };
 
-
-
-
 onMounted(() => { fetchEvents() });
-
-// onBeforeUpdate(() => {fetchEvents()
-//       console.log('Antes de actualizar el componente');
-//     });
-
-// onUpdated(fetchEvents);
-
 
 const calendarOptions = computed(() => ({
   longPressDelay: 0,
@@ -90,13 +75,6 @@ const calendarOptions = computed(() => ({
   eventsSet: handleEvents,
 }));
 
-
-
-
-
-
-
-
 const sendEmailInDialog = async (mail, asunto, descripcion) => {
   await sendMailDialog(mail, asunto, descripcion)
 }
@@ -107,7 +85,6 @@ const sendWhatsappInDialog = async (numeroCliente, nombreCliente) => {
 // function handleWeekendsToggle() {
 //   weekends.value = !weekends.weekends;
 // }
-
 function handleDateSelect(info) {
   selectInfo.value = info; // Asigna el valor de selectInfo
   eventTitle.value = '';
@@ -151,14 +128,6 @@ function handleEventClick(info) {
   eventModalOpen.value = true;
 }
 
-
-const handleToogle = () => {
-
-
-}
-
-
-
 async function deleteEvent(eventId) {
 
   console.log(' id a eliminar', eventId)
@@ -196,7 +165,7 @@ function handleEvents(events) {
   <div class='demo-app'>
     <div class='demo-app-sidebar'>
       <div class='demo-app-sidebar-section'>
-        <h2>Instrucciones {{ mantencion?.nombreDueño }}</h2>
+        <h2>Instrucciones</h2>
         <ul>
           <li>Selecciona las fechas y se te pedirá que crees un nuevo evento </li>
           <li>Eventos de arrastrar, soltar y cambiar el tamaño</li>
@@ -256,7 +225,7 @@ function handleEvents(events) {
           {{ selectedEvent.title }}
         </v-card-title>
         <v-card-text>
-          <div>Descripción: {{ selectedEvent.extendedProps.descripcion }}</div>
+          <div class="descripcion">Descripción: {{ selectedEvent.extendedProps.descripcion }}</div>
         </v-card-text>
         <v-card-actions class="botones">
           <v-btn color="error" text @click="deleteEvent(selectedEvent.id)">Eliminar</v-btn>
@@ -333,8 +302,13 @@ b {
 
 .fc {
   /* the calendar root */
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
+}
+
+.descripcion {
+  max-height: 15rem;
+  overflow-y: auto;
 }
 
 @media (max-width: 600px) {
