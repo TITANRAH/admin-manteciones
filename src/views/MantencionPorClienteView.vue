@@ -43,9 +43,11 @@ const fetchEvents = async () => {
       end: doc.data().end, // Convertir la fecha a objeto Date
       allDay: doc.data().allDay,
       extendedProps: {
-        descripcion: doc.data().value,
+        descripcion: doc.data().extendedProps.descripcion,
       },
     };
+
+    console.log(doc.data().descripcion)
     events.value.push(evento);
   });
   calendarOptions.value.events = events.value;
