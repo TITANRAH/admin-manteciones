@@ -82,7 +82,7 @@ const sendEmailInDialog = async (mail, asunto, descripcion) => {
   await sendMailDialog(mail, asunto, descripcion)
 }
 const sendWhatsappInDialog = async (numeroCliente, nombreCliente) => {
-  console.log(numeroCliente)
+  console.log(nombreCliente)
   await enviarWhatsapp(numeroCliente, nombreCliente)
 }
 // function handleWeekendsToggle() {
@@ -235,7 +235,7 @@ function handleEvents(events) {
             @click="sendEmailInDialog(mantencion?.correoDueño, selectedEvent.title, selectedEvent.extendedProps.descripcion)">
             <v-icon>mdi-email</v-icon>
           </v-btn>
-          <v-btn icon @click="sendWhatsappInDialog(mantencion?.fonoDueño, mantencion?.nombreCliente)">
+          <v-btn icon @click="sendWhatsappInDialog(mantencion?.fonoDueño, mantencion?.nombreDueño)">
             <v-icon>mdi-whatsapp</v-icon>
           </v-btn>
         </v-card-actions>

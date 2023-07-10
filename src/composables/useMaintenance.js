@@ -54,7 +54,7 @@ export default function useMantenciones() {
 
   const enviarWhatsapp = (numeroCliente, nombreCliente) => {
 
-    console.log('numero', numeroCliente)
+    console.log('numero', nombreCliente)
     if (numeroCliente != '' && nombreCliente != '') {
       const url = `https://api.whatsapp.com/send?phone=${numeroCliente}&text=Hola,%20${nombreCliente}%20no%20olvides%20que%20tu%20vehículo%20está%20próximo%20a%20necesitara%20una%20mantencíon%20, hablemos!`;
       window.location.href = url;

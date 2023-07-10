@@ -35,10 +35,10 @@ const calculoFechaProximaMantencion = () => {
    const tiempoRestante = fechaCalculada.getTime() - Date.now();
    const semanas = Math.ceil(tiempoRestante / (1000 * 60 * 60 * 24 * 7));
    const semanasRestantes = semanas;
-   //  console.log('semanasRestantes.value', semanasRestantes.value)
+   //  console.log('semanasRestantes.value', semanasRestantes)
    //  console.log('contactar Cliente desde compsable', contactarCliente.value)
 
-   if (semanasRestantes == 2) {
+   if (semanasRestantes <= 2) {
       contactar.value = true;
       cambiarCampo(props.mantencion?.id, true)
       if (props.mantencion?.contactarCliente == true) {
