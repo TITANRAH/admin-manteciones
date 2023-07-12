@@ -1,10 +1,10 @@
 <script setup>
-import { useForm, useField } from 'vee-validate';
-import { validacionSchema, imageSchema } from '@/validations/mantencionesSchema'
-import { collection, addDoc } from "firebase/firestore";
-import { useFirestore } from 'vuefire'
-import { useRouter } from 'vue-router';
 import useImage from '@/composables/useImage';
+import { imageSchema, validacionSchema } from '@/validations/mantencionesSchema';
+import { addDoc, collection } from "firebase/firestore";
+import { useField, useForm } from 'vee-validate';
+import { useRouter } from 'vue-router';
+import { useFirestore } from 'vuefire';
 
 //ARRAY PARA LOS AÑOS EN LA VISTA
 const años = [1990, 1991, 1992, 1993, 1994, 1995, 
@@ -118,7 +118,17 @@ if (docRef.id) {
   console.log('docRef.id', docRef.id)
   router.push({ name: 'mantenciones' })
 }
-console.log("documento guardado con ID: ", docRef.id);
+
+ // Guardar en el historialMantenciones
+ const historialRef = collection(db, 'mantenciones', docRef.id, 'historialMantenciones');
+  const historialDocRef = await addDoc(historialRef, {
+    ...mantencion,
+    imagen: url.value,
+    fecha: new Date(), // Agrega la fecha actual o cualquier otra información que desees almacenar
+  });
+
+  console.log("documento guardado con ID: ", docRef.id);
+  console.log('Historial guardado con ID:', historialDocRef.id);
 })
 //FIN SUBMIT FORM
 

@@ -1,8 +1,8 @@
 <script setup>
 
-import useMantenciones from '../composables/useMaintenance';
-import { formatedDate } from '../helpers/index'
 import { onMounted, ref } from 'vue';
+import useMantenciones from '../composables/useMaintenance';
+import { formatedDate } from '../helpers/index';
 
 const { contactar, enviarWhatsapp, cambiarCampo, sendMail } = useMantenciones()
 
@@ -90,9 +90,14 @@ const calculoFechaProximaMantencion = () => {
       <v-divider></v-divider>
 
       <v-card-actions>
-         <v-icon icon="mdi-car-cog" size="30" color="white" class="me-2 pb-1"></v-icon>
+         <v-icon icon="mdi-car-clock" size="25" color="white" class="me-1 pb-1"></v-icon>
          <v-btn class="text-white text-center" :to="{ name: 'mantencion', params: { id: props.mantencion?.id } }">
-            Ver Reporte
+            Ver Calendario
+         </v-btn>
+         
+         <v-icon icon="mdi-car-cog" size="25" color="white" class="me-0 pb-1"></v-icon>
+         <v-btn class="text-white text-center" :to="{ name: 'editar-mantencion', params: { id: props.mantencion?.id } }">
+            Nueva Mantencion
          </v-btn>
       </v-card-actions>
    </v-card>

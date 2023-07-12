@@ -40,6 +40,12 @@ const router = createRouter({
       component: ()=> import('../views/AddMaintenance.vue'),
       meta: {requiresAuth: true}
     },
+    {
+      path: '/mantenciones/editar_mantencion/:id',
+      name: 'editar-mantencion',
+      component: () => import('../views/EditarMaintenance.vue'),
+      meta: {requiresAuth: true}
+    },
    
   ]
 })
