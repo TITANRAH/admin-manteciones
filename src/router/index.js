@@ -42,8 +42,8 @@ const router = createRouter({
     },
     {
       path: '/mantenciones/editar_mantencion/:id',
-      name: 'editar-mantencion',
-      component: () => import('../views/EditarMaintenance.vue'),
+      name: 'nueva-mantencion',
+      component: () => import('../views/NewMaintenance.vue'),
       meta: {requiresAuth: true}
     },
    

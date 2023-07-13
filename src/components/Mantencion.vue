@@ -53,6 +53,9 @@ const calculoFechaProximaMantencion = () => {
 </script>
 <template>
    <v-card class="mx-auto mx-0 my-2 rounded-xl rounded-be-0" min-width="370" :color="contactar ? '#ba4a4d' : '#3f51b5'">
+      <v-btn color="blue" icon class="mt-2 ml-2">
+         <v-icon @click="">mdi-pencil</v-icon>
+      </v-btn>
       <v-card-item class="text-white" :title="`Patente: ${props.mantencion?.patenteVehiculo}`">
          <template v-slot:subtitle>
             <v-icon icon="mdi-account" size="18" color="white" class="me-1 pb-1"></v-icon>
@@ -66,7 +69,7 @@ const calculoFechaProximaMantencion = () => {
          </template>
       </v-card-item>
 
-      <v-card-item  class="text-white mb-0 mt-0 py-0 ">
+      <v-card-item class="text-white mb-0 mt-0 py-0 ">
          <template v-slot:subtitle>
             Próxima Mantención: {{ fechaFormateada }}
          </template>
@@ -94,9 +97,9 @@ const calculoFechaProximaMantencion = () => {
          <v-btn class="text-white text-center" :to="{ name: 'mantencion', params: { id: props.mantencion?.id } }">
             Ver Calendario
          </v-btn>
-         
+
          <v-icon icon="mdi-car-cog" size="25" color="white" class="me-0 pb-1"></v-icon>
-         <v-btn class="text-white text-center" :to="{ name: 'editar-mantencion', params: { id: props.mantencion?.id } }">
+         <v-btn class="text-white text-center" :to="{ name: 'nueva-mantencion', params: { id: props.mantencion?.id } }">
             Nueva Mantencion
          </v-btn>
       </v-card-actions>
