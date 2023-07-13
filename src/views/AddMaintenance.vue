@@ -5,6 +5,7 @@ import { addDoc, collection } from "firebase/firestore";
 import { useField, useForm } from 'vee-validate';
 import { useRouter } from 'vue-router';
 import { useFirestore } from 'vuefire';
+import Swal from 'sweetalert2';
 
 //ARRAY PARA LOS AÑOS EN LA VISTA
 const años = [1990, 1991, 1992, 1993, 1994, 1995, 
@@ -116,7 +117,24 @@ const docRef = await addDoc(collection(db, "mantenciones"), {
 
 if (docRef.id) {
   console.log('docRef.id', docRef.id)
-  router.push({ name: 'mantenciones' })
+
+  Swal.fire({
+      title: 'Guardado correctamente, ¿Deseas crear costos de Mantención?',
+      showCancelButton: true,
+      confirmButtonText: 'Costos de Mantención',
+      cancelButtonText: 'ir a Mantenciones',
+      reverseButtons: true,
+      icon: 'question',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Redirigir a la página de "mantenciones"
+        router.push({ name: 'crear-costo', params: {id:docRef.id} })
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        // Redirigir a la página de "crear un costo asociado"
+        router.push({ name: 'mantenciones' })
+      }
+    });
+  
 }
 
  // Guardar en el historialMantenciones
@@ -149,6 +167,7 @@ if (docRef.id) {
      <v-card-subtitle class="text-h5 py-5 px-0 text-indigo">
     Datos del Cliente
      </v-card-subtitle>
+     
 
       <v-text-field class="mb-5" label="Nombre Dueño" v-model="nombreDueño.value.value"
       :error-messages="nombreDueño.errorMessage.value"/>

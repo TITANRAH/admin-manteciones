@@ -4,7 +4,7 @@
 </script>
 <template>
     <div>
-       costo mantencion
+       costo
     </div>
 </template>
 

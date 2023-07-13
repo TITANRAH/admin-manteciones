@@ -47,6 +47,13 @@ const router = createRouter({
       meta: {requiresAuth: true}
     },
    
+    {
+      path: '/mantenciones/crear_costos_mantencion/:id',
+      name: 'crear-costo',
+      component: () => import('../views/GuardarCostoMantencion.vue'),
+      meta: {requiresAuth: true}
+    },
+   
   ]
 })
 
