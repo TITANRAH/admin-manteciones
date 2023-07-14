@@ -6,22 +6,28 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import esLocale from '@fullcalendar/core/locales/es';
 import { useRoute } from 'vue-router';
-import { query, where, collection, addDoc, getDocs, deleteDoc } from 'firebase/firestore';
+import { query, where, collection, addDoc, getDocs, deleteDoc, updateDoc } from 'firebase/firestore';
 import { useFirestore } from 'vuefire';
 import { uid } from 'uid'
 import { formatedDate } from '../helpers/index'
+
 const route = useRoute();
 const db = useFirestore();
 const currentEvents = ref([]);
 const modalOpen = ref(false);
 const eventTitle = ref('');
 const eventDescription = ref('');
-const selectInfo = ref(null); // Agrega esta línea para declarar la variable selectInfo
+const eventPatente = ref('');
+const selectInfo = ref(null);
 const eventModalOpen = ref(false);
 const selectedEvent = ref(null);
 const weekends = ref(false)
 const initialEvents = ref([])
-const calendarRef = ref(null); 
+const calendarRef = ref(null);
+const modalEdit = ref(false)
+const arrowTimer = ref(null);
+const arrowHovered = ref(false);
+
 
 const fetchEvents = async () => {
   const eventosCollectionRef = collection(db, 'eventosCalendarioGeneral');
@@ -32,15 +38,15 @@ const fetchEvents = async () => {
     const evento = {
       id: doc.data().id,
       title: doc.data().title,
-      start: doc.data().start, // Convertir la fecha a objeto Date
-      end: doc.data().end, // Convertir la fecha a objeto Date
+      start: doc.data().start,
+      end: doc.data().end,
       allDay: doc.data().allDay,
       extendedProps: {
         descripcion: doc.data().extendedProps.descripcion,
+        patente: doc.data().extendedProps.patente,
       },
     };
 
-  
     events.value.push(evento);
   });
 
@@ -48,7 +54,7 @@ const fetchEvents = async () => {
   initialEvents.value = events.value;
 };
 
-onMounted(async() => { await fetchEvents() });
+onMounted(async () => { await fetchEvents() });
 
 const calendarOptions = computed(() => ({
   longPressDelay: 0,
@@ -70,18 +76,43 @@ const calendarOptions = computed(() => ({
   select: handleDateSelect,
   eventClick: handleEventClick,
   eventsSet: handleEvents,
+  eventDrop: handleEventDrop
 }));
 
-function handleDateSelect(info) {
-  selectInfo.value = info; // Asigna el valor de selectInfo
-  eventTitle.value = '';
-  eventDescription.value = '';
-  modalOpen.value = true;
+
+
+async function handleEventDrop(info) {
+  const eventId = info.event.id;
+  const newStart = info.event.start.toISOString().split('T')[0];
+  const newEnd = info.event.end.toISOString().split('T')[0];
+
+  // Actualizar el evento en Firebase
+  const eventosCollectionRef = collection(db, 'eventosCalendarioGeneral');
+  const eventQuery = query(eventosCollectionRef, where('id', '==', eventId));
+  const querySnapshot = await getDocs(eventQuery);
+
+  querySnapshot.forEach(async (doc) => {
+    await updateDoc(doc.ref, {
+      start: newStart,
+      end: newEnd,
+    });
+  });
+
+  // Actualizar el estado local del evento en el calendario
+  const calendarApi = calendarRef.value.getApi();
+  const eventObj = calendarApi.getEventById(eventId);
+  if (eventObj) {
+    eventObj.setStart(newStart);
+    eventObj.setEnd(newEnd);
+  }
 }
 
-function scrollToEvent(event) {
-  const calendarApi = calendarRef.value.getApi();
-  calendarApi.gotoDate(event.start);
+function handleDateSelect(info) {
+  selectInfo.value = info;
+  eventTitle.value = '';
+  eventDescription.value = '';
+  eventPatente.value = '';
+  modalOpen.value = true;
 }
 
 async function createEvent() {
@@ -96,13 +127,13 @@ async function createEvent() {
       allDay: selectInfoValue.allDay,
       extendedProps: {
         descripcion: eventDescription.value,
+        patente: eventPatente.value,
       },
     };
 
     const calendarApi = selectInfoValue.view.calendar;
     calendarApi.addEvent(event);
 
-    // Guardar el evento en la nueva colección "eventosCalendarioGeneral"
     const eventosCollectionRef = collection(db, 'eventosCalendarioGeneral');
     await addDoc(eventosCollectionRef, event);
 
@@ -116,7 +147,6 @@ function cancelEvent() {
 
 function handleEventClick(info) {
   selectedEvent.value = info.event;
-  console.log('selecetedevent', selectedEvent.value)
   eventModalOpen.value = true;
 }
 
@@ -148,6 +178,25 @@ async function deleteEvent(eventId) {
   eventModalOpen.value = false;
 }
 
+async function deleteAllEvents() {
+  const eventosCollectionRef = collection(db, 'eventosCalendarioGeneral');
+  const eventosQuerySnapshot = await getDocs(eventosCollectionRef);
+
+  try {
+    eventosQuerySnapshot.forEach(async (doc) => {
+      await deleteDoc(doc.ref);
+    });
+  } catch (error) {
+    console.log('error delete', error);
+  }
+
+  const calendarApi = calendarRef.value.getApi();
+  calendarApi.removeAllEvents();
+
+  currentEvents.value = [];
+  eventModalOpen.value = false;
+}
+
 function handleWeek() {
   weekends.value = !weekends.value
   fetchEvents()
@@ -156,21 +205,69 @@ function handleWeek() {
 function handleEvents(events) {
   currentEvents.value = events;
 }
+
+async function updateEvent(eventId) {
+  if (selectedEvent.value && eventTitle.value && eventDescription.value) {
+    const newTitle = eventTitle.value;
+    const newDescription = eventDescription.value;
+    const newPatente = eventPatente.value;
+
+    const eventosCollectionRef = collection(db, 'eventosCalendarioGeneral');
+    const eventQuery = query(eventosCollectionRef, where('id', '==', eventId));
+    const querySnapshot = await getDocs(eventQuery);
+
+    querySnapshot.forEach(async (doc) => {
+      await updateDoc(doc.ref, {
+        title: newTitle,
+        extendedProps: {
+          descripcion: newDescription,
+          patente: newPatente,
+        },
+      });
+    });
+
+    const calendarApi = calendarRef.value.getApi();
+    const eventObj = calendarApi.getEventById(eventId);
+    if (eventObj) {
+      eventObj.setProp('title', newTitle);
+      eventObj.setExtendedProp('descripcion', newDescription);
+      eventObj.setExtendedProp('patente', newPatente);
+    }
+
+    modalEdit.value = false;
+  }
+}
+
+function editEvent() {
+  eventModalOpen.value = false
+  modalEdit.value = true
+}
+
+function scrollToEvent(event) {
+  const calendarApi = calendarRef.value.getApi();
+  calendarApi.gotoDate(event.start);
+}
 </script>
 <template>
   <div class='demo-app'>
     <div class='demo-app-sidebar'>
-     
+
       <v-btn color="indigo" @click="handleWeek()">{{ weekends ? 'VER LUNES A VIERNES' : 'VER LUNES A DOMINGO' }}</v-btn>
 
       <div class='demo-app-sidebar-section'>
         <h2>Todos los Eventos ({{ currentEvents.length }})</h2>
         <ul class="eventos">
           <li v-for='event in currentEvents' :key='event.id' @click="scrollToEvent(event)">
+            <v-icon class="mb-1" size="30" color="red" @click="deleteEvent(event.id)">mdi-delete-forever-outline</v-icon>
             <b>{{ formatedDate(event.startStr) }}</b>
             <i>{{ event.title }}</i>
           </li>
         </ul>
+
+        <v-btn v-if="currentEvents.length > 1" @click="deleteAllEvents()" color="red"><v-icon size="30"
+            color="white">mdi-delete-forever-outline</v-icon>
+          <h5>Eliminar Todos</h5>
+        </v-btn>
       </div>
     </div>
     <div class='demo-app-main'>
@@ -197,7 +294,8 @@ function handleEvents(events) {
         </v-card-title>
         <v-card-text>
           <v-text-field v-model="eventTitle" label="Título"></v-text-field>
-          <v-textarea v-model="eventDescription" label="Descripción"></v-textarea>
+          <v-text-field v-model="eventPatente"  label="Patente"></v-text-field>
+          <v-textarea v-model="eventDescription" label="Descripción"></v-textarea>         
         </v-card-text>
         <v-card-actions>
           <v-btn color="primary" @click="createEvent">Guardar</v-btn>
@@ -205,19 +303,42 @@ function handleEvents(events) {
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <!-- MODAL EDIT -->
+    <v-dialog v-model="modalEdit" max-width="500px">
+
+      <v-card>
+        <v-card-title>
+          <span class="headline">Editar Evento</span>
+        </v-card-title>
+        <v-card-text>
+          <v-text-field v-model="eventTitle" label="Título"></v-text-field>
+          <v-text-field v-model="eventPatente" label="Patente"></v-text-field>
+          <v-textarea v-model="eventDescription" label="Descripción"></v-textarea>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="primary" @click="updateEvent(selectedEvent.id)">Guardar Cambios</v-btn>
+          <v-btn color="secondary" @click="modalEdit = false">Cancelar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <!-- Modal de Vuetify para mostrar detalles del evento -->
     <v-dialog v-model="eventModalOpen" max-width="500px">
+    
       <v-card>
+        <v-btn text @click="eventModalOpen = false">Cerrar</v-btn>
         <v-card-title>
           {{ selectedEvent.title }}
         </v-card-title>
         <v-card-text>
           <div class="descripcion">Descripción: {{ selectedEvent.extendedProps.descripcion }}</div>
+          <div class="descripcion">Patente: {{ selectedEvent.extendedProps.patente }}</div>
         </v-card-text>
         <v-card-actions class="botones">
+          <v-btn color="blue" text @click="editEvent()">Editar</v-btn>
           <v-btn color="error" text @click="deleteEvent(selectedEvent.id)">Eliminar</v-btn>
-          <v-btn text @click="eventModalOpen = false">Cerrar</v-btn>
+          
+          <v-btn text @click="eventModalOpen = false">Crear Cliente</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -271,9 +392,9 @@ b {
   padding: 2em;
 }
 
-.eventos{
-  max-height: 20rem;
-  overflow-y:auto;
+.eventos {
+  max-height: 55rem;
+  overflow-y: auto;
 }
 
 .demo-app-main {
@@ -292,13 +413,21 @@ b {
   overflow-y: auto;
 }
 
-.eventos li{
+.eventos li {
   cursor: pointer
 }
 
 @media (max-width: 600px) {
   .demo-app {
     flex-direction: column;
+  }
+
+  .fc .fc-toolbar.fc-header-toolbar {
+    margin-bottom: 1.5em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* justify-content: left; */
   }
 
   .demo-app-sidebar {
