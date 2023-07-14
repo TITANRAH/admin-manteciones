@@ -4,6 +4,7 @@ import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import esLocale from '@fullcalendar/core/locales/es';
 import { useRoute } from 'vue-router';
 import { query, where, collection, addDoc, getDocs, deleteDoc } from 'firebase/firestore';
 import { useFirestore } from 'vuefire';
@@ -18,7 +19,7 @@ const eventDescription = ref('');
 const selectInfo = ref(null); // Agrega esta línea para declarar la variable selectInfo
 const eventModalOpen = ref(false);
 const selectedEvent = ref(null);
-// const weekends = ref(false)
+const weekends = ref(false)
 const initialEvents = ref([])
 const calendarRef = ref(null); 
 
@@ -39,7 +40,7 @@ const fetchEvents = async () => {
       },
     };
 
-    console.log(doc.data().descripcion)
+  
     events.value.push(evento);
   });
 
@@ -51,7 +52,7 @@ onMounted(async() => { await fetchEvents() });
 
 const calendarOptions = computed(() => ({
   longPressDelay: 0,
-  locale: 'es',
+  locale: esLocale,
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
   headerToolbar: {
     left: 'prev,next today',
@@ -65,7 +66,7 @@ const calendarOptions = computed(() => ({
   selectable: true,
   selectMirror: true,
   dayMaxEvents: true,
-  weekends: true,
+  weekends: weekends.value,
   select: handleDateSelect,
   eventClick: handleEventClick,
   eventsSet: handleEvents,
@@ -76,6 +77,11 @@ function handleDateSelect(info) {
   eventTitle.value = '';
   eventDescription.value = '';
   modalOpen.value = true;
+}
+
+function scrollToEvent(event) {
+  const calendarApi = calendarRef.value.getApi();
+  calendarApi.gotoDate(event.start);
 }
 
 async function createEvent() {
@@ -142,6 +148,11 @@ async function deleteEvent(eventId) {
   eventModalOpen.value = false;
 }
 
+function handleWeek() {
+  weekends.value = !weekends.value
+  fetchEvents()
+}
+
 function handleEvents(events) {
   currentEvents.value = events;
 }
@@ -149,21 +160,13 @@ function handleEvents(events) {
 <template>
   <div class='demo-app'>
     <div class='demo-app-sidebar'>
-      <div class='demo-app-sidebar-section'>
-        <h2>Instrucciones</h2>
-        <ul>
-          <li>Selecciona las fechas y se te pedirá que crees un nuevo evento </li>
-          <li>Eventos de arrastrar, soltar y cambiar el tamaño</li>
-          <li>Click en el evento para eliminar o visualizar</li>
-          <li>Click en el evento para contactar al Cliente, por correo o Whatsapp</li>
-        </ul>
-      </div>
-
+     
+      <v-btn color="indigo" @click="handleWeek()">{{ weekends ? 'VER LUNES A VIERNES' : 'VER LUNES A DOMINGO' }}</v-btn>
 
       <div class='demo-app-sidebar-section'>
         <h2>Todos los Eventos ({{ currentEvents.length }})</h2>
         <ul class="eventos">
-          <li v-for='event in currentEvents' :key='event.id'>
+          <li v-for='event in currentEvents' :key='event.id' @click="scrollToEvent(event)">
             <b>{{ formatedDate(event.startStr) }}</b>
             <i>{{ event.title }}</i>
           </li>
@@ -287,6 +290,10 @@ b {
 .descripcion {
   max-height: 15rem;
   overflow-y: auto;
+}
+
+.eventos li{
+  cursor: pointer
 }
 
 @media (max-width: 600px) {
