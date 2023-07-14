@@ -59,6 +59,12 @@ const router = createRouter({
       component: () => import('../views/EditMaintenanceView.vue'),
       meta: {requiresAuth: true}
     },
+    {
+      path: '/calendario-general',
+      name: 'calendario-general',
+      component: () => import('../views/CalendarioGeneralView.vue'),
+      meta: {requiresAuth: true}
+    },
 
 
    
