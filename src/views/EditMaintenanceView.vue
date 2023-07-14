@@ -177,7 +177,7 @@ const submit = handleSubmit(async (values) => {
 <template>
   <v-card max-width="800" flat class="mx-auto my-10">
     <v-card-title class="text-h4 font-weight-bold" tag="h3">
-      Nueva Mantención
+      Editar Mantención
     </v-card-title>
 
     <v-card-subtitle class="text-h5 py-5">
