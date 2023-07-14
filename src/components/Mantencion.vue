@@ -3,6 +3,8 @@
 import { onMounted, ref } from 'vue';
 import useMantenciones from '../composables/useMaintenance';
 import { formatedDate } from '../helpers/index';
+import { useRoute } from 'vue-router';
+const route = useRoute()
 
 const { contactar, enviarWhatsapp, cambiarCampo, sendMail } = useMantenciones()
 
@@ -53,8 +55,8 @@ const calculoFechaProximaMantencion = () => {
 </script>
 <template>
    <v-card class="mx-auto mx-0 my-2 rounded-xl rounded-be-0" min-width="370" :color="contactar ? '#ba4a4d' : '#3f51b5'">
-      <v-btn color="blue" icon class="mt-2 ml-2">
-         <v-icon @click="">mdi-pencil</v-icon>
+      <v-btn :to="{ name: 'editar-mantencion', params: { id: props.mantencion?.id } }" color="blue" icon class="mt-2 ml-2">
+         <v-icon >mdi-pencil</v-icon>
       </v-btn>
       <v-card-item class="text-white" :title="`Patente: ${props.mantencion?.patenteVehiculo}`">
          <template v-slot:subtitle>
