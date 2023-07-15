@@ -1,19 +1,16 @@
 <script setup>
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc } from "firebase/firestore";
 import { useField, useForm } from 'vee-validate';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useFirestore } from 'vuefire';
 import { costosSchema } from '../validations/costosSchema';
 import { propertyPrice } from '../helpers/index';
 
 const route = useRoute()
-const mantencionId = route.params.id;
-
 const db = useFirestore()
 const costos = ref([]);
 const showButtonActions = ref(true)
-
 
 const nombreServicio = useField('nombreServicio')
 const valorServicio = useField('valorServicio')
@@ -26,6 +23,55 @@ const nuevoCosto = ref({
     valorServicio: valorServicio.value.value,
     estadoPagoCosto: estadoPagoCosto.value.value
 })
+
+
+
+onMounted(async () => {
+
+    const idMantencion = route.params.idMantencion;
+    const idCliente = route.params.idCliente;
+    const mantencionDocRef = doc(db, 'clientes', idCliente, 'mantenciones', idMantencion);
+    const mantencionDocSnap = await getDoc(mantencionDocRef);
+    console.log(mantencionDocSnap.data());
+    if (mantencionDocSnap.exists()) {
+        const mantencionData = mantencionDocSnap.data();
+
+        const fecha = new Date()
+        const options = {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric',
+            timeZone: 'America/Santiago'
+        };
+
+        for (const key in mantencionData) {
+            if (key !== 'fechaMantencion' && key !== 'detallesVehiculo' && key !== 'aceiteDescripcion' &&
+                key !== 'inspeccionVisualMotor' && key !== 'revisiones' && key !== 'usoFamiliar' && key !== 'usoLaboral' && mantencionData[key]) {
+
+                const nuevoCosto = {
+                    fecha: fecha.toLocaleString('es-CL', options),
+                    nombreServicio: key,
+                    valorServicio: '',
+                    estadoPagoCosto: false
+                };
+                costos.value.push(nuevoCosto);
+            }
+        }
+        console.log(mantencionData.fechaMantencion)
+        console.log('Costos:', costos.value);
+    } else {
+        console.log('La mantención no existe');
+    }
+    console.log('Costos:', costos.value);
+})
+
+// const db = useFirestore()
+// const costos = ref([]);
+
+
 
 
 const addCosto = () => {
@@ -70,36 +116,42 @@ const { handleSubmit } = useForm({
 
 
 const submit = handleSubmit(async () => {
+  // Guardar los datos principales de la mantención
 
-    // Guardar los datos principales de la mantencion
+  console.log('entro al submit', costos.value);
 
-    console.log('entro al submit', costos.value)
+  // Guardar el array completo de costos bajo un ID único en la subcolección "costosMantencion"
+  const costosRef = collection(
+    db,
+    'clientes',
+    route.params.idCliente,
+    'mantenciones',
+    route.params.idMantencion,
+    'costosMantencion'
+  );
 
-    //   Guardar el array completo de costos bajo un ID único en la subcolección "costos"
-    const costosRef = collection(db, 'mantenciones', mantencionId, 'costosMantencion');
-
-    for (const costo of costos.value) {
-        if (
-            costo.estadoPagoCosto === undefined ||
-            costo.estadoPagoCosto === null ||
-            costo.estadoPagoCosto === '' ||
-            costo.estadoPagoCosto === 'false'
-        ) {
-            costo.estadoPagoCosto = false;
-        }
+  for (const costo of costos.value) {
+    if (
+      costo.estadoPagoCosto === undefined ||
+      costo.estadoPagoCosto === null ||
+      costo.estadoPagoCosto === '' ||
+      costo.estadoPagoCosto === 'false'
+    ) {
+      costo.estadoPagoCosto = false;
     }
-    const costosDocRef = await addDoc(costosRef, { costos: costos.value });
-    console.log('Array de costos guardado con ID:', costosDocRef.id);
-    if (costosDocRef.id) {
-        costos.value = []
-        showButtonActions.value = true
-    }
+  }
 
+  const costosDocRef = await addDoc(costosRef, { costos: costos.value });
+  console.log('Array de costos guardado con ID:', costosDocRef.id);
+
+  if (costosDocRef.id) {
+    costos.value = [];
+    showButtonActions.value = true;
+  }
 });
 
-// const show = () => {
-//     console.log('boton funciona')
-// }
+
+
 
 
 const pendiente = computed(() => {
@@ -129,7 +181,7 @@ const pagado = computed(()=>{
   }, 0);
 })
 
-   
+
 
 
 
@@ -189,7 +241,7 @@ const pagado = computed(()=>{
 
                 </tbody>
             </v-table>
-            <div class="boton mt-6">
+            <div v-if="costos.value != []" class="boton mt-6">
 
                 <v-btn color="green" class="w-50" @click="submit">Guardar</v-btn>
             </div>
@@ -197,7 +249,7 @@ const pagado = computed(()=>{
         </v-form>
     </div>
 
-    <!-- <v-card class="mt-6" elevation="0">
+    <v-card class="mt-6" elevation="0">
 
     <v-card-subtitle class="text-h5 py-5 px-3 text-indigo" >
       Contabilidad
@@ -226,11 +278,11 @@ const pagado = computed(()=>{
                 </tr>
             </tbody>
         </v-table>   
-    </v-card> -->
+    </v-card>
 
 
-
-    <v-card class=" mx-auto mt-5" max-width="500">
+    
+    <v-card v-if="costos.value != []" class=" mx-auto mt-5" max-width="500">
         <v-card-subtitle class="text-h5 py-5 px-3 text-indigo">
                 Contabilidad
         </v-card-subtitle>

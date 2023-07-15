@@ -5,13 +5,13 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import esLocale from '@fullcalendar/core/locales/es';
-import { useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { query, where, collection, addDoc, getDocs, deleteDoc, updateDoc } from 'firebase/firestore';
 import { useFirestore } from 'vuefire';
 import { uid } from 'uid'
 import { formatedDate } from '../helpers/index'
 
-const route = useRoute();
+const router = useRouter();
 const db = useFirestore();
 const currentEvents = ref([]);
 const modalOpen = ref(false);
@@ -25,8 +25,11 @@ const weekends = ref(false)
 const initialEvents = ref([])
 const calendarRef = ref(null);
 const modalEdit = ref(false)
-const arrowTimer = ref(null);
-const arrowHovered = ref(false);
+const clientExist = ref(false)
+const clienteId = ref()
+
+
+
 
 
 const fetchEvents = async () => {
@@ -80,7 +83,7 @@ const calendarOptions = computed(() => ({
 }));
 
 
-
+// MOVER EL EVENTO DE FECHA Y ACTUALIZARLO EN LA FECHA QUE LO SUELTO
 async function handleEventDrop(info) {
   const eventId = info.event.id;
   const newStart = info.event.start.toISOString().split('T')[0];
@@ -97,7 +100,7 @@ async function handleEventDrop(info) {
       end: newEnd,
     });
   });
-
+ 
   // Actualizar el estado local del evento en el calendario
   const calendarApi = calendarRef.value.getApi();
   const eventObj = calendarApi.getEventById(eventId);
@@ -106,6 +109,7 @@ async function handleEventDrop(info) {
     eventObj.setEnd(newEnd);
   }
 }
+ // FIN MOVER
 
 function handleDateSelect(info) {
   selectInfo.value = info;
@@ -115,6 +119,8 @@ function handleDateSelect(info) {
   modalOpen.value = true;
 }
 
+
+// CREAR EVENTO
 async function createEvent() {
   if (eventTitle.value) {
     const selectInfoValue = selectInfo.value;
@@ -141,15 +147,38 @@ async function createEvent() {
   }
 }
 
+// FIN CREAR EVENTO
+
+// CERRAR MODEL DE CREACION DE EVENTO
 function cancelEvent() {
   modalOpen.value = false;
 }
+// FIN CERRAR MODEL DE CREACION DE EVENTO
 
-function handleEventClick(info) {
-  selectedEvent.value = info.event;
+
+// CLIKEAR UN EVENTO Y SABER SI EL CLIENTE ESTA CREADO Y LLENAR LA VARIABLE ID CLIENTE
+async function handleEventClick(info) {
   eventModalOpen.value = true;
-}
+  selectedEvent.value = info.event;
+  console.log('patente',info.event.extendedProps.patente)
 
+    const clientesCollectionRef = collection(db, 'clientes');
+    const querySnapshot = await getDocs(query(clientesCollectionRef, where('patenteVehiculo', '==', info.event.extendedProps.patente.toLowerCase())));
+
+    if (querySnapshot.size > 0) {
+      console.log('cliente existe')
+      const clienteDoc = querySnapshot.docs[0];
+      clienteId.value = clienteDoc.id;    
+      clientExist.value = true
+    }  else {
+      console.log('cliente no existe')
+      clientExist.value = false 
+    }
+}
+// FIN CLIKEAR UN EVENTO Y SABER SI EL CLIENTE ESTA CREADO Y LLENAR LA VARIABLE ID CLIENTE
+
+
+// ELIMINAR EVENTO EN EL FRONT Y BACK
 async function deleteEvent(eventId) {
   const eventosCollectionRef = collection(db, 'eventosCalendarioGeneral');
   const eventQuery = query(eventosCollectionRef, where('id', '==', eventId));
@@ -164,7 +193,6 @@ async function deleteEvent(eventId) {
   }
 
   const calendarApi = calendarRef.value.getApi();
-
   const currentEventsValue = currentEvents.value;
   const eventIndex = currentEventsValue.findIndex((e) => e.id === eventId);
   if (eventIndex !== -1) {
@@ -174,14 +202,14 @@ async function deleteEvent(eventId) {
     }
     currentEventsValue.splice(eventIndex, 1);
   }
-
   eventModalOpen.value = false;
 }
+// FIN ELIMINAR EVENTO EN EL FRONT Y BACK
 
+// ELIMINAR TODOS LOS EVENTOS
 async function deleteAllEvents() {
   const eventosCollectionRef = collection(db, 'eventosCalendarioGeneral');
   const eventosQuerySnapshot = await getDocs(eventosCollectionRef);
-
   try {
     eventosQuerySnapshot.forEach(async (doc) => {
       await deleteDoc(doc.ref);
@@ -189,29 +217,36 @@ async function deleteAllEvents() {
   } catch (error) {
     console.log('error delete', error);
   }
-
   const calendarApi = calendarRef.value.getApi();
   calendarApi.removeAllEvents();
 
   currentEvents.value = [];
   eventModalOpen.value = false;
 }
+// FIN ELIMINAR TODOS LOS EVENTOS
 
+// SHOW SEMANA
 function handleWeek() {
   weekends.value = !weekends.value
   fetchEvents()
 }
+// FIN SHOW SEMANA
 
+// PASAR LOS EVENTOS A LA VARIABLE
 function handleEvents(events) {
   currentEvents.value = events;
 }
+// FIN PASAR LOS EVENTOS A LA VARIABLE
 
+// ACTUALIZAR EVENTO DESCRIPCION TITULO Y PATENTE
 async function updateEvent(eventId) {
   if (selectedEvent.value && eventTitle.value && eventDescription.value) {
+    // Obtener los nuevos valores del formulario
     const newTitle = eventTitle.value;
     const newDescription = eventDescription.value;
     const newPatente = eventPatente.value;
 
+    // Actualizar el documento en la base de datos
     const eventosCollectionRef = collection(db, 'eventosCalendarioGeneral');
     const eventQuery = query(eventosCollectionRef, where('id', '==', eventId));
     const querySnapshot = await getDocs(eventQuery);
@@ -226,6 +261,7 @@ async function updateEvent(eventId) {
       });
     });
 
+    // Actualizar el evento en el calendario
     const calendarApi = calendarRef.value.getApi();
     const eventObj = calendarApi.getEventById(eventId);
     if (eventObj) {
@@ -234,19 +270,42 @@ async function updateEvent(eventId) {
       eventObj.setExtendedProp('patente', newPatente);
     }
 
+    // Cerrar el modal de edición
     modalEdit.value = false;
   }
 }
+//FIN ACTUALIZAR EVENTO DESCRIPCION TITULO Y PATENTE
 
-function editEvent() {
+
+// EDITAR ABRIR MODAL Y PASAR VALORES A LA VISTA EN EL MODAL DE EDICION
+function editEvent(event) {
   eventModalOpen.value = false
+  eventTitle.value = event.title;
+  eventDescription.value = event.extendedProps.descripcion;
+  eventPatente.value = event.extendedProps.patente;
   modalEdit.value = true
 }
+// FIN EDITAR ABRIR MODAL Y PASAR VALORES A LA VISTA EN EL MODAL DE EDICION
 
+// MOVER EVENTO DE FECHA
 function scrollToEvent(event) {
   const calendarApi = calendarRef.value.getApi();
   calendarApi.gotoDate(event.start);
 }
+// MOVER EVENTO DE FECHA
+
+// ENVIAR A VISTA DE CREACION DE CLIENTE
+function crearCliente(){
+  router.push({ name: 'crear-cliente'})
+}
+// FIN ENVIAR A VISTA DE CREACION DE CLIENTE
+
+// IR A CLIENTE
+function irAcliente(){
+  console.log('cliente existe')
+  router.push({ name: 'cliente', params: {id:clienteId.value}})
+}
+// FIN IR A CLIENTE
 </script>
 <template>
   <div class='demo-app'>
@@ -335,10 +394,10 @@ function scrollToEvent(event) {
           <div class="descripcion">Patente: {{ selectedEvent.extendedProps.patente }}</div>
         </v-card-text>
         <v-card-actions class="botones">
-          <v-btn color="blue" text @click="editEvent()">Editar</v-btn>
-          <v-btn color="error" text @click="deleteEvent(selectedEvent.id)">Eliminar</v-btn>
-          
-          <v-btn text @click="eventModalOpen = false">Crear Cliente</v-btn>
+          <v-btn color="blue" text @click="editEvent(selectedEvent)">Editar</v-btn>
+          <v-btn color="error" text @click="deleteEvent(selectedEvent.id)">Eliminar</v-btn>         
+          <v-btn v-if="clientExist" text @click="irAcliente()">Ir a Cliente</v-btn>
+          <v-btn v-else text @click="crearCliente()">Crear Cliente</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

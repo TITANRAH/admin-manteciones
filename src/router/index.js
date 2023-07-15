@@ -48,21 +48,49 @@ const router = createRouter({
     },
    
     {
-      path: '/mantenciones/crear_costos_mantencion/:id',
-      name: 'crear-costo',
-      component: () => import('../views/GuardarCostoMantencion.vue'),
-      meta: {requiresAuth: true}
-    },
-    {
       path: '/mantenciones/editar_mantencion/:id',
       name: 'editar-mantencion',
       component: () => import('../views/EditMaintenanceView.vue'),
       meta: {requiresAuth: true}
     },
+    
+    // enfoque nuevo
     {
       path: '/calendario-general',
       name: 'calendario-general',
       component: () => import('../views/CalendarioGeneralView.vue'),
+      meta: {requiresAuth: true}
+    },
+    
+    {
+      path: '/mantenciones/crear_costos_mantencion/:idCliente/:idMantencion',
+      name: 'crear-costo',
+      component: () => import('../views/GuardarCostoMantencion.vue'),
+      meta: {requiresAuth: true}
+    },
+    
+    {
+      path: '/crear-cliente',
+      name: 'crear-cliente',
+      component: () => import('../views/CreateClientView.vue'),
+      meta: {requiresAuth: true}
+    },
+    {
+      path: '/cliente/:id',
+      name: 'cliente',
+      component: () => import('../views/ClientView.vue'),
+      meta: {requiresAuth: true}
+    },
+    {
+      path: '/crear-mantencion/:id',
+      name: 'crear-mantencion',
+      component: () => import('../views/CreateMaintenanceView.vue'),
+      meta: {requiresAuth: true}
+    },
+    {
+      path: '/mantencion/:idCliente/:id',
+      name: 'mantencion-cliente',
+      component: () => import('../views/MantencionView.vue'),
       meta: {requiresAuth: true}
     },
 
@@ -73,10 +101,7 @@ const router = createRouter({
 
 
 router.beforeEach(async (to, from, next)=>{
- 
   const requiresAuth = to.matched.some(url => url.meta.requiresAuth)
-
- 
   if(requiresAuth){
     try {
       await authenticateUser()
