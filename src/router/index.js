@@ -93,6 +93,12 @@ const router = createRouter({
       component: () => import('../views/MantencionView.vue'),
       meta: {requiresAuth: true}
     },
+    {
+      path: '/costo-mantencion/:idCliente/:idMantencion/:idCosto',
+      name: 'costo-mantencion',
+      component: () => import('../views/CostoView.vue'),
+      meta: {requiresAuth: true}
+    },
 
 
    
