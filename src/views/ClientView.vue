@@ -163,6 +163,10 @@ const redirigirAMantencion = ( id) => {
          <v-btn class="ml-2" icon :to="{name: 'calendario-general'}"><v-icon size="30">mdi-arrow-left</v-icon></v-btn>
 
       <v-form class="mt-10">
+      <v-card-title class="text-h4 font-weight-bold text-indigo mb-6" tag="h3">
+      {{ !disabled ? 'Editar Cliente' : 'Cliente' }}
+      </v-card-title>
+
        <v-card-subtitle class="text-h5 py-5 px-0 text-indigo">
       Datos del Cliente
        </v-card-subtitle>

@@ -227,8 +227,7 @@ const submit = handleSubmit(async (values) => {
   }
   // Mostrar un mensaje de éxito
   Swal.fire({
-    title: 'Guardado correctamente ',
-    text: '¿Deseas crear costos de Mantención?',
+    title: '¿Deseas crear costos para esta nueva esta Mantención?',
     showCancelButton: true,
     confirmButtonText: 'Costos de Mantención',
     cancelButtonText: 'ir a Calendario',
@@ -273,7 +272,7 @@ const handleIrAcostoAsociado = () => {
       <v-btn class="ml-2 mb-6" icon :to="{ name: 'cliente', params: { id: route.params.idCliente } }"><v-icon
           size="30">mdi-arrow-left</v-icon></v-btn>
       <v-card-title class="text-h4 font-weight-bold text-indigo" tag="h3">
-        Crear Mantención
+       {{ !disableEdit ? 'Editar Mantención' : 'Mantención' }} 
       </v-card-title>
 
 

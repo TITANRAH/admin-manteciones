@@ -128,7 +128,7 @@ if (docRef.id) {
     }).then((result) => {
       if (result.isConfirmed) {
         // Redirigir a la página de "mantenciones"
-        console.log('ccrear costo')
+        router.push({ name: 'crear-costo', params: { idCliente: route.params.id, idMantencion: docRef.id } });
         // router.push({ name: 'crear-costo', params: {id:docRef.id} })
       } else if (result.dismiss === Swal.DismissReason.cancel) {
         // Redirigir a la página de "crear un costo asociado"
