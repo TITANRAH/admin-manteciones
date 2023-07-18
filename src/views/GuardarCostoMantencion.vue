@@ -7,6 +7,7 @@ import { useFirestore } from 'vuefire';
 import { costosSchema } from '../validations/costosSchema';
 import { propertyPrice } from '../helpers/index';
 import Swal from 'sweetalert2';
+import { formatDate } from "@fullcalendar/core";
 
 const route = useRoute()
 const router = useRouter()
@@ -39,22 +40,23 @@ onMounted(async () => {
         const mantencionData = mantencionDocSnap.data();
 
         const fecha = new Date()
-        const options = {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
-            second: 'numeric',
-            timeZone: 'America/Santiago'
-        };
+        const fechaString = fecha.toISOString()
+        // const options = {
+        //     year: 'numeric',
+        //     month: 'long',
+        //     day: 'numeric',
+        //     hour: 'numeric',
+        //     minute: 'numeric',
+        //     second: 'numeric',
+        //     timeZone: 'America/Santiago'
+        // };
 
         for (const key in mantencionData) {
             if (key !== 'fechaMantencion' && key !== 'detallesVehiculo' && key !== 'aceiteDescripcion' &&
-                key !== 'inspeccionVisualMotor' && key !== 'revisiones' && key !== 'usoFamiliar' && key !== 'usoLaboral'  && key !== 'aceite'   && mantencionData[key]) {
+                key !== 'inspeccionVisualMotor' && key !== 'revisiones' && key !== 'usoFamiliar' && key !== 'usoLaboral' && key !== 'cambioAceite' && mantencionData[key]) {
 
                 const nuevoCosto = {
-                    fecha: fecha.toLocaleString('es-CL', options),
+                    fecha: formatDate(fechaString),
                     nombreServicio: key,
                     valorServicio: '',
                     estadoPagoCosto: false
@@ -80,17 +82,18 @@ const addCosto = () => {
 
     showButtonActions.value = false;
     const fecha = new Date()
-    const options = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric',
-        timeZone: 'America/Santiago'
-    };
+    const fechaString = fecha.toISOString()
+    // const options = {
+    //     year: 'numeric',
+    //     month: 'long',
+    //     day: 'numeric',
+    //     hour: 'numeric',
+    //     minute: 'numeric',
+    //     second: 'numeric',
+    //     timeZone: 'America/Santiago'
+    // };
     nuevoCosto.value = {
-        fecha: fecha.toLocaleString('es-CL', options),
+        fecha: formatDate(fechaString),
         nombreServicio: nombreServicio.value.value,
         valorServicio: valorServicio.value.value,
         estadoPagoCosto: estadoPagoCosto.value.value

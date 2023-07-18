@@ -1,17 +1,35 @@
 <script setup>
-import { addDoc, collection, doc, getDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
 import { useField, useForm } from 'vee-validate';
 import { ref, computed, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useFirestore } from 'vuefire';
 import { costosSchema } from '../validations/costosSchema';
-import { propertyPrice } from '../helpers/index';
+import { propertyPrice, formatedDate } from '../helpers/index';
+import Swal from 'sweetalert2';
+
+
+
 
 const route = useRoute()
+const router = useRouter()
 const db = useFirestore()
 const showButtonActions = ref(true)
 const costosAsociados = ref([])
 const showButtonFinishCost = ref(false)
+
+// campos documento
+
+const nombreCliente = ref('')
+const correoCliente = ref('')
+const fonoCliente = ref('')
+const kmAuto = ref('')
+const patenteVehiculo = ref('')
+const descripcionServicio = ref('')
+const fechaDeMantencion = ref('')
+
+
+
 
 const costos = ref([])
 
@@ -23,11 +41,11 @@ const estadoPagoCosto = useField('estadoPagoCosto', {
     initialValue: false
 });
 
-// const nuevoCosto = ref({
-//     nombreServicio: nombreServicio.value.value,
-//     valorServicio: valorServicio.value.value,
-//     estadoPagoCosto: estadoPagoCosto.value.value
-// })
+const nuevoCosto = ref({
+    nombreServicio: nombreServicio.value.value,
+    valorServicio: valorServicio.value.value,
+    estadoPagoCosto: estadoPagoCosto.value.value
+})
 
 
 
@@ -46,18 +64,19 @@ onMounted(async () => {
     );
     const costoDocSnap = await getDoc(costoDocRef);
 
+    // OBTENER COSTO
     if (costoDocSnap.exists()) {
         costos.value = costoDocSnap.data();
         console.log('costo en costoView', costos.value);
 
-        // Resto de la lógica para manejar el costo
     } else {
         console.log('El documento de costo no existe');
     }
 
     console.log('Costo:', costos.value.costos);
 
-    for (const costo of costos.value.costos) {
+   
+        for (const costo of costos.value.costos) {
         const nuevoCosto = {
             fecha: costo.fecha,
             nombreServicio: costo.nombreServicio,
@@ -65,7 +84,37 @@ onMounted(async () => {
             estadoPagoCosto: costo.estadoPagoCosto
         };
         costosAsociados.value.push(nuevoCosto)
+   
+
     }
+
+   
+    // OBTENER CLIENTE
+    const clienteDocRef = doc(db, 'clientes', idCliente);
+    const clienteDocSnap = await getDoc(clienteDocRef);
+    if (clienteDocSnap.exists()) {
+        const clienteData = clienteDocSnap.data();
+        nombreCliente.value = clienteData.nombreDueño;
+        correoCliente.value = clienteData.correoDueño;
+        kmAuto.value = clienteData.kmVehiculo;
+        fonoCliente.value = clienteData.fonoDueño;
+        patenteVehiculo.value = clienteData.patenteVehiculo;
+
+        console.log('nombre del cliente:', nombreCliente.value);
+
+    }
+
+    // OBTENER MATNENCION
+
+    const mantencionDocRef = doc(db, 'clientes', idCliente, 'mantenciones', idMantencion);
+    const mantencionDocSnap = await getDoc(mantencionDocRef);
+    if (mantencionDocSnap.exists()) {
+        const mantencionData = mantencionDocSnap.data();
+        fechaDeMantencion.value = mantencionData.fechaMantencion;
+        descripcionServicio.value = mantencionData.detallesVehiculo;
+    }
+
+
 
     // Verificar si todos los campos estadoPagoCosto son true
     costosAsociados.value.every(
@@ -118,110 +167,276 @@ const pagado = computed(() => {
     }, 0);
 })
 
+const addCosto = () => {
 
+    showButtonActions.value = false;
+    const fecha = new Date()
+    const fechaString = fecha.toISOString()
+    // const options = {
+    //     year: 'numeric',
+    //     month: 'long',
+    //     day: 'numeric',
+    //     hour: 'numeric',
+    //     minute: 'numeric',
+    //     second: 'numeric',
+    //     timeZone: 'America/Santiago'
+    // };
+    nuevoCosto.value = {
+        fecha: formatDate(fechaString),
+        nombreServicio: nombreServicio.value.value,
+        valorServicio: valorServicio.value.value,
+        estadoPagoCosto: estadoPagoCosto.value.value
+    };
 
+    costosAsociados.value.push(nuevoCosto.value);
 
-const submit = (event) => {
-    event.preventDefault();
-    // Guardar los datos principales de la mantención
-
-    console.log('entro al submit', costosAsociados.value);
-
-    // // Verificar si la mantención tiene costos asociados
-    // const costosMantencionRef = collection(
-    //     db,
-    //     'clientes',
-    //     route.params.idCliente,
-    //     'mantenciones',
-    //     route.params.idMantencion,
-    //     'costosMantencion'
-    // );
-    // const costosQuerySnapshot = await getDocs(costosMantencionRef);
-    // const tieneCostos = !costosQuerySnapshot.empty;
-
-    // if (tieneCostos) {
-    //     // Redirigir a la pantalla de costo asociado
-    //     const costoAsociadoId = costosQuerySnapshot.docs[0].id;
-
-    //     Swal.fire({
-    //         title: 'Atención',
-    //         text: 'Esta mantención ya tiene un costo asociado, serás redirigido a la página del costo',
-    //         icon: 'info',
-    //         confirmButtonText: 'Aceptar'
-    //     }).then(() => {
-    //         router.push({
-    //             name: 'costo-mantencion',
-    //             params: {
-    //                 idCliente: route.params.idCliente,
-    //                 idMantencion: route.params.idMantencion,
-    //                 idCosto: costoAsociadoId
-    //             }
-    //         });
-    //     });
-
-
-    // } else {
-    //     // No tiene costos asociados, permanecer en la pantalla actual para crear un nuevo costo
-    //     for (const costo of costos.value) {
-    //         if (
-    //             costo.estadoPagoCosto === undefined ||
-    //             costo.estadoPagoCosto === null ||
-    //             costo.estadoPagoCosto === '' ||
-    //             costo.estadoPagoCosto === 'false'
-    //         ) {
-    //             costo.estadoPagoCosto = false;
-    //         }
-    //     }
-
-    //     const costosRef = collection(
-    //         db,
-    //         'clientes',
-    //         route.params.idCliente,
-    //         'mantenciones',
-    //         route.params.idMantencion,
-    //         'costosMantencion'
-    //     );
-
-    //     const costosDocRef = await addDoc(costosRef, { costos: costos.value });
-    //     console.log('Array de costos guardado con ID:', costosDocRef.id);
-
-    //     if (costosDocRef.id) {
-
-    //         Swal.fire({
-    //             title: 'Costo guardado correctamente',
-    //             text: 'Serás redirigido a la página del costo guardado',
-    //             icon: 'success',
-    //             confirmButtonText: 'Aceptar'
-    //         }).then(() => {
-
-    //             router.push({
-    //                 name: 'costo-mantencion',
-    //                 params: {
-    //                     idCliente: route.params.idCliente,
-    //                     idMantencion: route.params.idMantencion,
-    //                     idCosto: costosDocRef.id
-    //                 }
-    //             });
-    //             costos.value = [];
-    //             showButtonActions.value = true;
-    //         })
-    //     }
-    // }
+    console.log(costos.value)
 };
 
+const removeCosto = (index) => {
+    costosAsociados.value.splice(index, 1);
+
+    if (costosAsociados.value.length == 0) {
+
+        console.log('array de costos asociados en cero')
+    }
+};
+
+const submitUpdateCost = async (event) => {
+
+    console.log('paso por actualizar primero')
+    event.preventDefault();
+
+    // Validar que los campos no sean null, vacíos o undefined
+   
+    console.log(costosAsociados.value)
+    const camposInvalidos = costosAsociados.value.some(costo => {
+        return (
+            costo.nombreServicio === null ||
+            costo.nombreServicio === '' ||
+            costo.nombreServicio === undefined ||
+            costo.valorServicio === null ||
+            costo.valorServicio === '' ||
+            costo.valorServicio === undefined
+            // Agrega aquí más campos que deseas validar
+        );
+    });
+
+    if (camposInvalidos) {
+        Swal.fire({
+            title: 'Error',
+            text: 'Uno o más campos son inválidos',
+            icon: 'error',
+            confirmButtonText: 'Aceptar'
+        });
+        return; // Detener el proceso si hay campos inválidos
+    }
+
+    //   const hayCostosSinPagar = costosAsociados.value.some(costo => costo.estadoPagoCosto !== true);
+
+    //   if (!hayCostosSinPagar) {
+    Swal.fire({
+        title: 'Confirmación',
+        text: '¿Estás seguro de actualizar estos costos antes de finalizar?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Aceptar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            console.log('todos pagados');
+            const costoRef = doc(
+                db,
+                'clientes',
+                route.params.idCliente,
+                'mantenciones',
+                route.params.idMantencion,
+                'costosMantencion',
+                route.params.idCosto
+            );
+
+            for (const costo of costosAsociados.value) {
+            if (
+                costo.estadoPagoCosto === undefined ||
+                costo.estadoPagoCosto === null ||
+                costo.estadoPagoCosto === '' ||
+                costo.estadoPagoCosto === 'false'
+            ) {
+                costo.estadoPagoCosto = false;
+            }
+        }
+
+            updateDoc(costoRef, { costos: costosAsociados.value })
+                .then(() => {
+                    console.log('Costo actualizado con ID:', route.params.idCosto);
+                    Swal.fire({
+                        title: 'Costos actualizados',
+
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar'
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error al actualizar los costos:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Ocurrió un error al actualizar los costos',
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar'
+                    });
+                });
+        }
+    });
+    //   } else {
+    //     console.log('aún hay costos sin pagar');
+    //     Swal.fire({
+    //       title: 'Atención',
+    //       text: 'Hay uno o más costos sin pagar',
+    //       icon: 'warning',
+    //       confirmButtonText: 'Aceptar'
+    //     });
+    //   }
+};
+
+const submitFinishedCost = (event) => {
+
+
+
+
+    const camposInvalidos = costosAsociados.value.some(costo => {
+        return (
+            costo.nombreServicio === null ||
+            costo.nombreServicio === '' ||
+            costo.nombreServicio === undefined ||
+            costo.valorServicio === null ||
+            costo.valorServicio === '' ||
+            costo.valorServicio === undefined
+            // Agrega aquí más campos que deseas validar
+        );
+    });
+
+    if (camposInvalidos) {
+        Swal.fire({
+            title: 'Error',
+            text: 'Uno o más campos son inválidos',
+            icon: 'error',
+            confirmButtonText: 'Aceptar'
+        });
+        return; // Detener el proceso si hay campos inválidos
+    }
+
+
+    event.preventDefault()
+    const todosPagados = costosAsociados.value.every(costo => costo.estadoPagoCosto == true);
+
+    if (todosPagados) {
+
+        const costoRef = doc(
+            db,
+            'clientes',
+            route.params.idCliente,
+            'mantenciones',
+            route.params.idMantencion,
+            'costosMantencion',
+            route.params.idCosto
+        );
+        Swal.fire({
+            title: 'Confirmación',
+            text: '¿Deseas guardar el costo en finanzas y terminar esta mantención?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Aceptar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+
+                for (const costo of costosAsociados.value) {
+            if (
+                costo.estadoPagoCosto === undefined ||
+                costo.estadoPagoCosto === null ||
+                costo.estadoPagoCosto === '' ||
+                costo.estadoPagoCosto === 'false'
+            ) {
+                costo.estadoPagoCosto = false;
+            }
+        }
+
+                updateDoc(costoRef, { costos: costosAsociados.value })
+                    .then(() => {
+                        console.log('costo actualizado con id', costoRef.id)
+                    })
+                    .catch((error) => {
+                        console.error('Error al actualizar los costos:', error);
+                    });
+                if (costoRef.id) {
+                    console.log('guardar en coleccion');
+
+                    guardarDocumentoContabilidad(costosAsociados.value, pagado.value)
+
+                    Swal.fire({
+                        title: 'Costo guardado',
+                        text: 'El costo se ha guardado en finanzas',
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar'
+                    }).then(() => {
+                        // Redirigir a otra página
+                        router.push('/otra-pagina');
+                    });
+                }
+            }
+        });
+    } else {
+        Swal.fire({
+            title: 'Atención',
+            text: 'Para finalizar, todos los costos deben estar pagados',
+            icon: 'warning',
+            confirmButtonText: 'Aceptar'
+        });
+    }
+}
+
+const guardarDocumentoContabilidad = async (costosAsociados, valorContable) => {
+
+
+    const fecha = new Date()
+    const fechaString = fecha.toISOString()
+    console.log(typeof fechaString);
+    const documento = {
+        idCliente: route.params.idCliente,
+        idMantencion: route.params.idMantencion,
+        idCosto: route.params.idCosto,
+        nombreCliente: nombreCliente.value,
+        correoCliente: correoCliente.value,
+        fonoCliente: fonoCliente.value,
+        kmAuto: kmAuto.value,
+        patenteVehiculo: patenteVehiculo.value,
+        descripcionServicio: descripcionServicio.value,
+        fechaDeMantencion: fechaDeMantencion.value,
+        fechaFinalizacionCostos: formatedDate(fechaString),
+        costosAsociados: costosAsociados,
+        valorContable: valorContable
+    }
+
+    console.log('documento final', documento)
+    //   try {
+    //     const docRef = await addDoc(collection(db, 'ContabilidadMantenciones'), {
+    //       fechaFinalizacion,
+    //       costosAsociados,
+    //       valorContable
+    //     });
+    //     console.log('Documento guardado en ContabilidadMantenciones con ID:', docRef.id);
+    //   } catch (error) {
+    //     console.error('Error al guardar el documento en ContabilidadMantenciones:', error);
+    //   }
+};
 
 watch(
     costosAsociados.value,
     (newCostos, oldCostos) => {
-        if (newCostos) {      
-            newCostos.every((costo) => {
-                if (costo.estadoPagoCosto === true) {
-                    showButtonFinishCost.value = true;
-                }             
-                if (costo.estadoPagoCosto === false) {
-                    showButtonFinishCost.value = false;
-                }
-            });
+        if (newCostos) {
+            const hayAlMenosUnFalse = newCostos.some(costo => costo.estadoPagoCosto === false);
+
+            showButtonFinishCost.value = !hayAlMenosUnFalse;
         }
     }
 );
@@ -231,7 +446,7 @@ watch(
     <v-form>
         <div>
             <v-card-subtitle class="text-h5 py-5 px-3 text-indigo">
-                Costos Asociados
+                Finalizar costos Asociados
             </v-card-subtitle>
 
             <v-table class="tabla">
@@ -259,7 +474,7 @@ watch(
                 </thead>
                 <tbody>
                     <tr v-for="(costo, index) in costosAsociados" :key="index">
-                        <td><v-text-field disabled v-model="costo.nombreServicio"
+                        <td><v-text-field v-model="costo.nombreServicio"
                                 :error-messages="nombreServicio.errorMessage.value"></v-text-field></td>
                         <td><v-text-field v-model="costo.valorServicio" :error-messages="valorServicio.errorMessage.value">$
                             </v-text-field></td>
@@ -268,7 +483,7 @@ watch(
                                 :label="`${(costo.estadoPagoCosto == undefined || costo.estadoPagoCosto == 'No Pagado' || costo.estadoPagoCosto == false ? 'Pendiente' : 'Pagado')}`">
                             </v-switch>
                         </td>
-                        <!-- <td class="btn-actions">
+                        <td class="btn-actions">
 
                             <v-btn class="mb-3 mt-2 mr-2" color="red" icon>
                                 <v-icon @click="removeCosto(index)">mdi-minus-thick</v-icon>
@@ -277,7 +492,7 @@ watch(
                                 <v-icon @click="addCosto()">mdi-plus</v-icon>
                             </v-btn>
 
-                        </td> -->
+                        </td>
                     </tr>
 
 
@@ -363,13 +578,13 @@ watch(
 
 
         <div v-if="showButtonFinishCost" class="boton mt-6 ">
-            <v-btn block color="green" class="w-50" @click="submit">Guardar</v-btn>
+            <v-btn block color="green" class="w-50" @click="submitFinishedCost($event)">Finalizar costos asociados</v-btn>
 
         </div>
 
 
         <div v-else class="boton mt-6">
-            <v-btn block color="pink" @click="">Editar Valores o Pendientes</v-btn>
+            <v-btn block color="pink" @click="submitUpdateCost($event)">Editar Valores o Pendientes</v-btn>
         </div>
 
 

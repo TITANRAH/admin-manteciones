@@ -99,6 +99,12 @@ const router = createRouter({
       component: () => import('../views/CostoView.vue'),
       meta: {requiresAuth: true}
     },
+    {
+      path: '/cobros-pendientes',
+      name: 'cobros-pendientes',
+      component: () => import('../views/CobrosPendientesView.vue'),
+      meta: {requiresAuth: true}
+    },
 
 
    
