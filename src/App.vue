@@ -24,8 +24,8 @@ const toggle = () => {
         </template>
         <!-- esto ubica el elemento al lado izquierdo -->
         <template v-slot:append>
-          <v-btn v-if="route.name !== 'agregar-mantencion' && auth.isAuth" :to="{name: 'agregar-mantencion'}">
-            Agregar Mantención
+          <v-btn v-if="route.name !== 'crear-cliente' && auth.isAuth" :to="{name: 'crear-cliente'}">
+            Crear Cliente
           </v-btn>
           <div v-if="auth.isAuth">
             <v-btn @click="auth.logout()" icon="mdi-logout">
@@ -45,7 +45,7 @@ const toggle = () => {
         <v-divider></v-divider>
 
         <v-list density="compact" nav >
-          <v-list-item prepend-icon="mdi-car-arrow-right" @click="toggle()" title="Agregar Mantención" value="car" :to="{name: 'agregar-mantencion'}"></v-list-item>
+          <v-list-item prepend-icon="mdi-car-arrow-right" @click="toggle()" title="Crear Cliente" value="car" :to="{name: 'crear-cliente'}"></v-list-item>
           <v-list-item prepend-icon="mdi-account-group-outline" @click="toggle()" title="Clientes" value="clientes"></v-list-item>
           <v-list-item prepend-icon="mdi-car-settings" title="Dashboard" @click="toggle()" value="dashboard" :to="{name: 'dashboard'}"></v-list-item>
           <v-list-item prepend-icon="mdi-calendar" title="Calendario General" @click="toggle()" value="calendar" :to="{name: 'calendario-general'}"></v-list-item>
