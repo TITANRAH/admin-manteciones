@@ -565,7 +565,7 @@ watch(
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(costo, index) in costosAsociados" :key="index">
+                    <tr v-for="(costo, index) in costos" :key="index">
                         <td>{{ costo.nombreServicio }}</td>
                         <td>$ {{ costo.valorServicio }}</td>
                         <td>{{ costo.estadoPagoCosto ? 'Pagado' : 'No pagado' }}</td>
