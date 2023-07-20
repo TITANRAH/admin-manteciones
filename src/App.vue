@@ -24,7 +24,7 @@ const toggle = () => {
         </template>
         <!-- esto ubica el elemento al lado izquierdo -->
         <template v-slot:append>
-          <v-btn v-if="route.name !== 'crear-cliente' && auth.isAuth" :to="{name: 'crear-cliente'}">
+          <v-btn v-if="route.name !== 'crear-cliente' && route.name !== 'login' && auth.isAuth" :to="{name: 'crear-cliente'}">
             Crear Cliente
           </v-btn>
           <div v-if="auth.isAuth">
