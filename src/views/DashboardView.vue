@@ -14,6 +14,12 @@
       description: 'Aquí encontrarás a los clientes con deuda, podrás además ir al costo asociado y editarlo',
       route: 'cobros-pendientes',
       icono: 'mdi-account-cash'
+    },
+    {
+      title: 'Clientes',
+      description: 'Aquí encontrarás a todos tus clientes, podrás enviarles correos o verlos por detalle',
+      route: 'listado-clientes',
+      icono: 'mdi-account-group'
     }
   ]);
   

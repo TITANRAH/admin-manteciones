@@ -61,6 +61,12 @@ const router = createRouter({
       component: () => import('../views/CalendarioGeneralView.vue'),
       meta: {requiresAuth: true}
     },
+    {
+      path: '/listado-clientes',
+      name: 'listado-clientes',
+      component: () => import('../views/ListClientesView.vue'),
+      meta: {requiresAuth: true}
+    },
     
     {
       path: '/mantenciones/crear_costos_mantencion/:idCliente/:idMantencion',
