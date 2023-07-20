@@ -14,6 +14,7 @@ const router = useRouter()
 const db = useFirestore()
 const costos = ref([]);
 const showButtonActions = ref(true)
+const isNotMobile = ref(false)
 
 const nombreServicio = useField('nombreServicio')
 const valorServicio = useField('valorServicio')
@@ -27,10 +28,17 @@ const nuevoCosto = ref({
     estadoPagoCosto: estadoPagoCosto.value.value
 })
 
+const handleResize = () => {
+  const mobileThreshold = 900; // Puedes ajustar este valor según tus necesidades
+  isNotMobile.value = window.innerWidth <= mobileThreshold;
+
+  console.log('valor de isNotMobile en guardar costo maintenance', isNotMobile.value)
+};
 
 
 onMounted(async () => {
-
+    handleResize()
+    window.addEventListener('resize', handleResize); 
     const idMantencion = route.params.idMantencion;
     const idCliente = route.params.idCliente;
     const mantencionDocRef = doc(db, 'clientes', idCliente, 'mantenciones', idMantencion);
@@ -247,7 +255,7 @@ const pagado = computed(() => {
             Ingresa los costos
         </v-card-subtitle>
         <v-form>
-            <v-table class="tabla">
+            <v-table  class="tabla">
                 <thead>
                     <tr>
                         <th class="text-left">
@@ -270,7 +278,7 @@ const pagado = computed(() => {
                         </th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody v-if="!isNotMobile">
                     <tr v-for="(costo, index) in costos" :key="index">
                         <td><v-text-field v-model="costo.nombreServicio"
                                 :error-messages="nombreServicio.errorMessage.value"></v-text-field></td>
@@ -296,8 +304,39 @@ const pagado = computed(() => {
 
                 </tbody>
             </v-table>
-            <div v-if="costos.value != []" class="boton mt-6">
 
+            <v-card v-if="isNotMobile" class="mt-3" v-for="(costo, index) in costos" :key="index">
+                <v-list>
+
+                    <v-list-item>
+                      
+                        <v-list-item-subtitle><v-text-field v-model="costo.nombreServicio"
+                                :error-messages="nombreServicio.errorMessage.value"></v-text-field>
+                        </v-list-item-subtitle>
+                        <v-list-item-subtitle> <v-text-field v-model="costo.valorServicio" :error-messages="valorServicio.errorMessage.value">$
+                            </v-text-field></v-list-item-subtitle>
+                        <v-list-item-subtitle><v-switch v-model="costo.estadoPagoCosto" hide-details inset
+                                :label="`${(costo.estadoPagoCosto == undefined || costo.estadoPagoCosto == 'No Pagado' || costo.estadoPagoCosto == false ? 'Pendiente' : 'Pagado')}`">
+                            </v-switch></v-list-item-subtitle>
+                     <v-row class="botones-movil">
+                        <v-col class="col">
+                            <v-btn class="mb-3 mt-2 mr-2" color="red" icon>
+                                <v-icon @click="removeCosto(index)">mdi-minus-thick</v-icon>
+                            </v-btn>
+                          
+                        </v-col>
+                        <v-col class="col">
+                            <v-btn class="mb-3 mt-2 mr-2 ml-5" color="green" icon>
+                                <v-icon @click="addCosto()">mdi-plus</v-icon>
+                            </v-btn>
+
+                        </v-col>
+                     </v-row>
+                    </v-list-item>
+
+                </v-list>
+            </v-card>
+            <div v-if="costos.value != []" class="boton mt-6">
                 <v-btn color="green" class="w-50" @click="submit">Guardar</v-btn>
             </div>
 

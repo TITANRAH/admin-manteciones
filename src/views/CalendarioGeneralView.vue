@@ -452,7 +452,7 @@ b {
 }
 
 .eventos {
-  max-height: 55rem;
+  max-height: 35rem;
   overflow-y: auto;
 }
 

@@ -27,6 +27,7 @@ const kmAuto = ref('')
 const patenteVehiculo = ref('')
 const descripcionServicio = ref('')
 const fechaDeMantencion = ref('')
+const isNotMobile = ref(false)
 
 
 
@@ -48,8 +49,15 @@ const nuevoCosto = ref({
 })
 
 
+const handleResize = () => {
+  const mobileThreshold = 900; // Puedes ajustar este valor según tus necesidades
+  isNotMobile.value = window.innerWidth >= mobileThreshold;
+};
 
 onMounted(async () => {
+    handleResize(); // Ejecuta la función cuando se monta el componente
+  window.addEventListener('resize', handleResize); 
+    
     const idMantencion = route.params.idMantencion;
     const idCliente = route.params.idCliente;
     const idCosto = route.params.idCosto;
@@ -75,8 +83,8 @@ onMounted(async () => {
 
     console.log('Costo:', costos.value.costos);
 
-   
-        for (const costo of costos.value.costos) {
+
+    for (const costo of costos.value.costos) {
         const nuevoCosto = {
             fecha: costo.fecha,
             nombreServicio: costo.nombreServicio,
@@ -84,11 +92,11 @@ onMounted(async () => {
             estadoPagoCosto: costo.estadoPagoCosto
         };
         costosAsociados.value.push(nuevoCosto)
-   
+
 
     }
 
-   
+
     // OBTENER CLIENTE
     const clienteDocRef = doc(db, 'clientes', idCliente);
     const clienteDocSnap = await getDoc(clienteDocRef);
@@ -182,7 +190,7 @@ const addCosto = () => {
     //     timeZone: 'America/Santiago'
     // };
     nuevoCosto.value = {
-        fecha: formatDate(fechaString),
+        fecha: formatedDate(fechaString),
         nombreServicio: nombreServicio.value.value,
         valorServicio: valorServicio.value.value,
         estadoPagoCosto: estadoPagoCosto.value.value
@@ -208,7 +216,7 @@ const submitUpdateCost = async (event) => {
     event.preventDefault();
 
     // Validar que los campos no sean null, vacíos o undefined
-   
+
     console.log(costosAsociados.value)
     const camposInvalidos = costosAsociados.value.some(costo => {
         return (
@@ -256,15 +264,15 @@ const submitUpdateCost = async (event) => {
             );
 
             for (const costo of costosAsociados.value) {
-            if (
-                costo.estadoPagoCosto === undefined ||
-                costo.estadoPagoCosto === null ||
-                costo.estadoPagoCosto === '' ||
-                costo.estadoPagoCosto === 'false'
-            ) {
-                costo.estadoPagoCosto = false;
+                if (
+                    costo.estadoPagoCosto === undefined ||
+                    costo.estadoPagoCosto === null ||
+                    costo.estadoPagoCosto === '' ||
+                    costo.estadoPagoCosto === 'false'
+                ) {
+                    costo.estadoPagoCosto = false;
+                }
             }
-        }
 
             updateDoc(costoRef, { costos: costosAsociados.value })
                 .then(() => {
@@ -351,15 +359,15 @@ const submitFinishedCost = (event) => {
             if (result.isConfirmed) {
 
                 for (const costo of costosAsociados.value) {
-            if (
-                costo.estadoPagoCosto === undefined ||
-                costo.estadoPagoCosto === null ||
-                costo.estadoPagoCosto === '' ||
-                costo.estadoPagoCosto === 'false'
-            ) {
-                costo.estadoPagoCosto = false;
-            }
-        }
+                    if (
+                        costo.estadoPagoCosto === undefined ||
+                        costo.estadoPagoCosto === null ||
+                        costo.estadoPagoCosto === '' ||
+                        costo.estadoPagoCosto === 'false'
+                    ) {
+                        costo.estadoPagoCosto = false;
+                    }
+                }
 
                 updateDoc(costoRef, { costos: costosAsociados.value })
                     .then(() => {
@@ -449,7 +457,7 @@ watch(
                 Finalizar costos Asociados
             </v-card-subtitle>
 
-            <v-table class="tabla">
+            <v-table  v-if="isNotMobile" class="tabla">
                 <thead>
                     <tr>
                         <th class="text-left">
@@ -472,7 +480,7 @@ watch(
                         </th> -->
                     </tr>
                 </thead>
-                <tbody>
+                <tbody >
                     <tr v-for="(costo, index) in costosAsociados" :key="index">
                         <td><v-text-field v-model="costo.nombreServicio"
                                 :error-messages="nombreServicio.errorMessage.value"></v-text-field></td>
@@ -499,7 +507,41 @@ watch(
                 </tbody>
             </v-table>
 
+            <v-card v-else class="mt-3" v-for="(costo, index) in costosAsociados" :key="index">
+                <v-list>
+
+                    <v-list-item>
+                        <!-- <v-list-item-title><b>{{ cliente.nombre }}</b> </v-list-item-title> -->
+                        <v-list-item-subtitle><v-text-field v-model="costo.nombreServicio"
+                                :error-messages="nombreServicio.errorMessage.value"></v-text-field>
+                        </v-list-item-subtitle>
+                        <v-list-item-subtitle> <v-text-field v-model="costo.valorServicio" :error-messages="valorServicio.errorMessage.value">$
+                            </v-text-field></v-list-item-subtitle>
+                        <v-list-item-subtitle><v-switch v-model="costo.estadoPagoCosto" hide-details inset
+                                :label="`${(costo.estadoPagoCosto == undefined || costo.estadoPagoCosto == 'No Pagado' || costo.estadoPagoCosto == false ? 'Pendiente' : 'Pagado')}`">
+                            </v-switch></v-list-item-subtitle>
+                     <v-row class="botones-movil">
+                        <v-col class="col">
+                            <v-btn class="mb-3 mt-2 mr-2" color="red" icon>
+                                <v-icon @click="removeCosto(index)">mdi-minus-thick</v-icon>
+                            </v-btn>
+                          
+                        </v-col>
+                        <v-col class="col">
+                            <v-btn class="mb-3 mt-2 mr-2 ml-5" color="green" icon>
+                                <v-icon @click="addCosto()">mdi-plus</v-icon>
+                            </v-btn>
+
+                        </v-col>
+                     </v-row>
+                    </v-list-item>
+
+                </v-list>
+            </v-card>
+
+
         </div>
+
 
         <v-card class="mt-6" elevation="0">
 
@@ -617,5 +659,25 @@ watch(
 .datos {
     display: flex;
     justify-content: right;
+}
+
+.botones-movil{
+    display: flex;
+    flex-direction: row;
+    margin: auto;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+    
+}
+
+.col{
+    display: flex;
+    flex-direction: row;
+    margin: auto;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+
 }
 </style>
