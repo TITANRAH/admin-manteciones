@@ -44,14 +44,16 @@ const toggle = () => {
 
         <v-divider></v-divider>
 
-        <v-list density="compact" nav >
-          <v-list-item prepend-icon="mdi-car-arrow-right" @click="toggle()" title="Crear Cliente" value="car" :to="{name: 'crear-cliente'}"></v-list-item>
-          <v-list-item prepend-icon="mdi-account-group-outline" @click="toggle()" title="Clientes" value="clientes"></v-list-item>
-          <v-list-item prepend-icon="mdi-car-settings" title="Dashboard" @click="toggle()" value="dashboard" :to="{name: 'dashboard'}"></v-list-item>
-          <v-list-item prepend-icon="mdi-calendar" title="Calendario General" @click="toggle()" value="calendar" :to="{name: 'calendario-general'}"></v-list-item>
-          <v-list-item v-if="auth.isAuth" prepend-icon="mdi-logout" title="Salir" @click="auth.logout()" value="salir" :to="{name: 'login'}"></v-list-item>
+        <v-list v-if="auth.isAuth" density="compact" nav >
+          <v-list-item  prepend-icon="mdi-car-arrow-right" @click="toggle()" title="Crear Cliente" value="car" :to="{name: 'crear-cliente'}"></v-list-item>
+          <v-list-item  prepend-icon="mdi-account-group-outline" @click="toggle()" title="Clientes" value="clientes"></v-list-item>
+          <v-list-item  prepend-icon="mdi-car-settings" title="Dashboard" @click="toggle()" value="dashboard" :to="{name: 'dashboard'}"></v-list-item>
+          <v-list-item  prepend-icon="mdi-calendar" title="Calendario General" @click="toggle()" value="calendar" :to="{name: 'calendario-general'}"></v-list-item>
+          <v-list-item  prepend-icon="mdi-logout" title="Salir" @click="auth.logout()" value="salir" :to="{name: 'login'}"></v-list-item>
 
         </v-list>
+
+        <h2 class="text-center mt-5" v-else>Inicia Sesión</h2>
       </v-navigation-drawer>
 
       <v-main>
