@@ -251,6 +251,7 @@ const pagado = computed(() => {
 </script>
 <template>
     <div>
+        <v-btn class="bg-indigo mb-6" :to="{name: 'cliente', params: {id: route.params.idCliente}}"><v-icon class="mr-2">mdi-arrow-left-bold</v-icon> Volver</v-btn>
         <v-card-subtitle class="text-h5 py-5 px-3 text-indigo">
             Ingresa los costos
         </v-card-subtitle>

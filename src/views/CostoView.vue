@@ -453,6 +453,8 @@ watch(
 <template>
     <v-form>
         <div>
+
+            <v-btn class="bg-indigo" :to="{name:'calendario-general'}">Ir a calendario</v-btn>
             <v-card-subtitle class="text-h5 py-5 px-3 text-indigo">
                 Finalizar costos Asociados
             </v-card-subtitle>
@@ -565,7 +567,7 @@ watch(
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(costo, index) in costos" :key="index">
+                    <tr v-for="(costo, index) in costosAsociados" :key="index">
                         <td>{{ costo.nombreServicio }}</td>
                         <td>$ {{ costo.valorServicio }}</td>
                         <td>{{ costo.estadoPagoCosto ? 'Pagado' : 'No pagado' }}</td>
@@ -597,7 +599,7 @@ watch(
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(costo, index) in costos" :key="index">
+                    <tr v-for="(costo, index) in costosAsociados" :key="index">
                         <td>{{ costo.nombreServicio }}</td>
                         <td>$ {{ costo.valorServicio ? propertyPrice(costo.valorServicio) : 0 }}</td>
                         <td>{{ costo.estadoPagoCosto ? 'Pagado' : 'Pendiente' }}</td>
