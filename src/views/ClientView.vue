@@ -96,7 +96,7 @@ const submit = handleSubmit(async (values) => {
 
 const { imagenVehiculo, ...cliente } = values
 console.log('values desde editar', cliente)
-
+cliente.patenteVehiculo = cliente.patenteVehiculo.toLowerCase()
 if (url.value) {
 
 try {
@@ -160,7 +160,7 @@ const redirigirAMantencion = ( id) => {
 
 <template>
      <v-card max-width="800" flat class="mx-auto">
-         <v-btn class="ml-2" icon :to="{name: 'calendario-general'}"><v-icon size="30">mdi-arrow-left</v-icon></v-btn>
+         <v-btn class="ml-2" icon :to="{name: 'dashboard'}"><v-icon size="30">mdi-arrow-left</v-icon></v-btn>
 
       <v-form class="mt-10">
       <v-card-title class="text-h4 font-weight-bold text-indigo mb-6" tag="h3">

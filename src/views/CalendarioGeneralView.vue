@@ -133,7 +133,7 @@ async function createEvent() {
       allDay: selectInfoValue.allDay,
       extendedProps: {
         descripcion: eventDescription.value,
-        patente: eventPatente.value,
+        patente: eventPatente.value.toLowerCase(),
       },
     };
 
@@ -256,7 +256,7 @@ async function updateEvent(eventId) {
         title: newTitle,
         extendedProps: {
           descripcion: newDescription,
-          patente: newPatente,
+          patente: newPatente.toLowerCase(),
         },
       });
     });
@@ -267,7 +267,7 @@ async function updateEvent(eventId) {
     if (eventObj) {
       eventObj.setProp('title', newTitle);
       eventObj.setExtendedProp('descripcion', newDescription);
-      eventObj.setExtendedProp('patente', newPatente);
+      eventObj.setExtendedProp('patente', newPatente.toLowerCase());
     }
 
     // Cerrar el modal de edición
@@ -308,6 +308,7 @@ function irAcliente(){
 // FIN IR A CLIENTE
 </script>
 <template>
+  <v-btn class="ml-2 mb-3" icon :to="{name: 'dashboard'}"><v-icon size="30">mdi-arrow-left</v-icon></v-btn>
   <div class='demo-app'>
     <div class='demo-app-sidebar'>
 

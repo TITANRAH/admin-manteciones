@@ -1,4 +1,4 @@
-<script setup>
+<!-- <script setup>
 import useImage from '@/composables/useImage';
 import { imageSchema, validacionSchema } from '@/validations/mantencionesSchema';
 import { addDoc, collection } from "firebase/firestore";
@@ -356,4 +356,4 @@ if (docRef.id) {
 
     </v-form>
   </v-card>
-</template>
+</template> -->

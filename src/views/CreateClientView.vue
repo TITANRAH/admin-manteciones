@@ -47,6 +47,7 @@ const submit = handleSubmit(async(values) => {
   const { imagenVehiculo, ...cliente } = values
 
 console.log('cliente', cliente)
+cliente.patenteVehiculo = cliente.patenteVehiculo.toLowerCase()
 
 const docRef = await addDoc(collection(db, "clientes"), {
   ...cliente,
@@ -81,7 +82,7 @@ if (docRef.id) {
 
 <template>
     <v-card max-width="800" flat class="mx-auto">
-        <v-btn class="ml-2 mb-5" icon :to="{name: 'calendario-general'}"><v-icon size="30">mdi-arrow-left</v-icon></v-btn>
+        <v-btn class="ml-2 mb-5" icon :to="{name: 'dashboard'}"><v-icon size="30">mdi-arrow-left</v-icon></v-btn>
       <v-card-title class="text-h4 font-weight-bold text-indigo" tag="h3">
        Crear Cliente
       </v-card-title>
