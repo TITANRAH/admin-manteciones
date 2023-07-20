@@ -570,7 +570,7 @@ watch(
                     <tr v-for="(costo, index) in costosAsociados" :key="index">
                         <td>{{ costo.nombreServicio }}</td>
                         <td>$ {{ costo.valorServicio }}</td>
-                        <td>{{ costo.estadoPagoCosto ? 'Pagado' : 'No pagado' }}</td>
+                        <td :class="costo.estadoPagoCosto ? 'bg-green' : 'bg-red'">{{ costo.estadoPagoCosto ? 'Pagado' : 'Pendiente' }}</td>
                     </tr>
                 </tbody>
             </v-table>
@@ -602,7 +602,7 @@ watch(
                     <tr v-for="(costo, index) in costosAsociados" :key="index">
                         <td>{{ costo.nombreServicio }}</td>
                         <td>$ {{ costo.valorServicio ? propertyPrice(costo.valorServicio) : 0 }}</td>
-                        <td>{{ costo.estadoPagoCosto ? 'Pagado' : 'Pendiente' }}</td>
+                        <td :class="costo.estadoPagoCosto ? 'bg-green' : 'bg-red'">{{ costo.estadoPagoCosto ? 'Pagado' : 'Pendiente' }}</td>
                     </tr>
                 </tbody>
             </v-table>
