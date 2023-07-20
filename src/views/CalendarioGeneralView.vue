@@ -27,6 +27,7 @@ const calendarRef = ref(null);
 const modalEdit = ref(false)
 const clientExist = ref(false)
 const clienteId = ref()
+const patenteBuscada = ref('')
 
 
 
@@ -306,18 +307,31 @@ function irAcliente(){
   router.push({ name: 'cliente', params: {id:clienteId.value}})
 }
 // FIN IR A CLIENTE
+
+
+const eventosFiltrados = computed(() => {
+  const patente = patenteBuscada.value.toLowerCase();
+  return currentEvents.value.filter((evento) => {
+    return evento.extendedProps.patente.toLowerCase().includes(patente);
+  });
+});
 </script>
 <template>
   <v-btn class="ml-2 mb-3" icon :to="{name: 'dashboard'}"><v-icon size="30">mdi-arrow-left</v-icon></v-btn>
   <div class='demo-app'>
+   
+  
     <div class='demo-app-sidebar'>
 
       <v-btn color="indigo" @click="handleWeek()">{{ weekends ? 'VER LUNES A VIERNES' : 'VER LUNES A DOMINGO' }}</v-btn>
 
       <div class='demo-app-sidebar-section'>
-        <h2>Todos los Eventos ({{ currentEvents.length }})</h2>
+        <v-text-field type="text" v-model="patenteBuscada" label="Buscar evento por patente"></v-text-field>
+       
+        <h2>Todos los Eventos ({{ eventosFiltrados.length }})</h2>
+
         <ul class="eventos">
-          <li v-for='event in currentEvents' :key='event.id' @click="scrollToEvent(event)">
+          <li v-for='event in eventosFiltrados' :key='event.id' @click="scrollToEvent(event)">
             <v-icon class="mb-1" size="30" color="red" @click="deleteEvent(event.id)">mdi-delete-forever-outline</v-icon>
             <b>{{ formatedDate(event.startStr) }}</b>
             <i>{{ event.title }}</i>

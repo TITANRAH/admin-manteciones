@@ -11,6 +11,9 @@ const idCliente = ref('')
 const idMantencion = ref('')
 const idCosto = ref('')
 const totalMontoDeuda = ref('')
+const patenteBuscada = ref('')
+
+
 
 
 const handleResize = () => {
@@ -46,6 +49,7 @@ onMounted(async () => {
                   id: clienteDoc.id,
                   idMantencion: idMantencion.value,
                   idCosto: idCosto.value,
+                  patente: clienteData.patenteVehiculo.toLowerCase(),
                   nombre: clienteData.nombreDueño,
                   fechaMantencion: mantencionDoc.data().fechaMantencion,
                   ...costo
@@ -65,12 +69,18 @@ onMounted(async () => {
   }
 });
 
+const filtrarPorPatente = () => {
+      return clientesEnFalse.value.filter((cliente) => {
+        return cliente.patente.includes(patenteBuscada.value.toLowerCase());
+      });
+    };
+
 const clientesUnique = computed(() => {
   const clientesMap = new Map();
 
   console.log(clientesEnFalse.value)
 
-  for (const cliente of clientesEnFalse.value) {
+  for (const cliente of filtrarPorPatente()) {
 
     console.log(cliente)
     if (!clientesMap.has(cliente.id)) {
@@ -79,6 +89,7 @@ const clientesUnique = computed(() => {
         idMantencion: cliente.idMantencion,
         idCosto: cliente.idCosto,
         nombre: cliente.nombre,
+        patente: cliente.patente,
         cantidadServiciosAdeudados: 0,
         totalMontoAdeudado: 0,
         fechaMantencion: cliente.fechaMantencion // Agregamos la fecha de la mantención al objeto del cliente
@@ -111,7 +122,14 @@ onUnmounted(() => {
 
 </script>
 <template>
+  <v-text-field
+  label="Buscar por Patente"
+  type="text"
+  v-model="patenteBuscada"
+  @input="filtrarPorPatente($event.target.value)"
+></v-text-field>
   <div v-if="isNotMobile">
+
 
     <div v-if="clientesUnique.length == []" class="sk-chase">
       <div class="sk-chase-dot"></div>
@@ -128,6 +146,7 @@ onUnmounted(() => {
           <thead>
             <tr>
               <th>Cliente</th>
+              <th>Patente</th>
               <th>Cantidad de servicios adeudados</th>
               <th>Total monto adeudado</th>
               <th>Fecha de mantención</th>
@@ -140,6 +159,7 @@ onUnmounted(() => {
             <tr v-for="(cliente, index) in clientesUnique" :key="index">
 
               <td>{{ cliente.nombre }}</td>
+              <td>{{ cliente.patente }}</td>
               <td>{{ cliente.cantidadServiciosAdeudados }}</td>
               <td>{{ propertyPrice(cliente.totalMontoAdeudado) }}</td>
               <td>{{ formatedDate(cliente.fechaMantencion) }}</td>
@@ -168,6 +188,8 @@ onUnmounted(() => {
         
           <v-list-item>
             <v-list-item-title><b>{{ cliente.nombre }}</b> </v-list-item-title>
+            <v-list-item-subtitle>Patente:<b>{{ cliente.patente }}</b>
+            </v-list-item-subtitle>
             <v-list-item-subtitle>Cantidad de servicios adeudados:<b>{{ cliente.cantidadServiciosAdeudados }}</b>
             </v-list-item-subtitle>
             <v-list-item-subtitle> Total monto adeudado: <b>{{ propertyPrice(cliente.totalMontoAdeudado)
