@@ -3,6 +3,7 @@ import { collection, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { deleteObject, ref as storageRef } from "firebase/storage";
 import { computed, ref } from "vue";
 import { useCollection, useFirebaseStorage, useFirestore } from "vuefire";
+import Swal from 'sweetalert2';
 
 export default function useMantenciones() {
 
@@ -56,7 +57,7 @@ export default function useMantenciones() {
 
     console.log('numero', nombreCliente)
     if (numeroCliente != '' && nombreCliente != '') {
-      const url = `https://api.whatsapp.com/send?phone=${numeroCliente}&text=Hola,%20${nombreCliente}%20no%20olvides%20que%20tu%20vehículo%20está%20próximo%20a%20necesitara%20una%20mantencíon%20, hablemos!`;
+      const url = `https://api.whatsapp.com/send?phone=${numeroCliente}&text=Hola,%20${nombreCliente}`;
       window.location.href = url;
     } else {
       return
@@ -82,9 +83,11 @@ export default function useMantenciones() {
   }
 
   const sendMailDialog = async (mailCliente, asunto, descripcion) => {
+
+
     const dataMail = {
       to: `${mailCliente}`,
-      from: 'granrah1@gmail.com',
+      from: 'tapiamecanico2023@gmail.com',
       subject: `${asunto}`,
       text: 'Mantención de tu Vehículo!',
       html: `<p>Hola soy Diego ,te envío esta información por si la necesitas:</p><p>${descripcion}</p><br/><p>Atte. Diego Tapia<p/><b><p>Ingeniero Mecánico<p/></b>`
@@ -92,6 +95,15 @@ export default function useMantenciones() {
     try {
       const response = await axios.post('https://servernodemailer-production.up.railway.app/api/mail', dataMail).then(async (resp) => {
         console.log('respuesta de servicio mail', resp)
+
+        if(resp.status == 200){
+          Swal.fire({
+            icon: 'success',
+            title: 'Correo enviado con éxito',
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        }
       });
     } catch (error) {
       console.log(error)
