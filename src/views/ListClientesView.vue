@@ -1,9 +1,10 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, getDoc, doc, deleteDoc } from 'firebase/firestore';
 import { useFirestore } from 'vuefire';
 import useMantenciones from '../composables/useMaintenance';
 import { useRouter } from 'vue-router';
+import Swal from 'sweetalert2';
 const router = useRouter()
 const { sendMailDialog, enviarWhatsapp } = useMantenciones();
 const db = useFirestore();
@@ -15,6 +16,7 @@ const asunto = ref('');
 const descripcion = ref('');
 const correoCliente = ref('')
 const searchTerm = ref('');
+
 
 const openEmailModal = (correo) => {
   correoCliente.value = correo
@@ -103,6 +105,72 @@ const irAcliente = (idCliente) => {
   router.push({ name: 'cliente', params: { id: idCliente } })
 }
 
+
+const eliminarCliente = async (clienteId) => {
+  try {
+    const result = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción eliminará al cliente y todas sus mantenciones con sus costos asociados.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true,
+    });
+
+    if (result.isConfirmed) {
+      const clientesCollectionRef = collection(db, 'clientes');
+      const clienteDoc = await getDoc(doc(clientesCollectionRef, clienteId));
+
+      if (clienteDoc.exists()) {
+        // Eliminar las mantenciones del cliente y sus subcolecciones (costosAsociados)
+        const mantencionesCollectionRef = collection(clienteDoc.ref, 'mantenciones');
+        const mantencionesSnapshot = await getDocs(mantencionesCollectionRef);
+        for (const mantencionDoc of mantencionesSnapshot.docs) {
+          // Eliminar la subcolección costosAsociados
+          const costosAsociadosCollectionRef = collection(mantencionDoc.ref, 'costosMantencion');
+          const costosAsociadosSnapshot = await getDocs(costosAsociadosCollectionRef);
+          for (const costoDoc of costosAsociadosSnapshot.docs) {
+            await deleteDoc(costoDoc.ref);
+          }
+
+          // Eliminar la mantención
+          await deleteDoc(mantencionDoc.ref);
+        }
+
+        // Eliminar el cliente de la colección de clientes
+        await deleteDoc(clienteDoc.ref);
+
+        // Actualizar la lista de clientes después de eliminar el cliente
+        const nuevosClientesSnapshot = await getDocs(clientesCollectionRef);
+        clientes.value = nuevosClientesSnapshot.docs.map((doc) => {
+          const clienteData = doc.data();
+          return {
+            id: doc.id,
+            nombreCliente: clienteData.nombreDueño,
+            correoCliente: clienteData.correoDueño,
+            foto: clienteData.imagen,
+            fonoCliente: clienteData.fonoDueño,
+            patenteVehiculo: clienteData.patenteVehiculo,
+            mantencionesRealizadas: [],
+          };
+        });
+
+        // Mostrar un swal de éxito
+        Swal.fire({
+          title: '¡Cliente eliminado!',
+          icon: 'success',
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      } else {
+        console.error("El cliente no existe");
+      }
+    }
+  } catch (error) {
+    console.error("Error al eliminar el cliente:", error);
+  }
+};
 </script>
 <template>
   <v-text-field v-model="searchTerm" label="Buscar por nombre o patente" class="mb-4"></v-text-field>
@@ -111,7 +179,12 @@ const irAcliente = (idCliente) => {
   </v-card-subtitle>
   <div class="cards">
     <v-card class="mx-auto mb-4 bg-indigo card" v-for="(cliente, index) of filteredClientes" :key="index">
-      <v-img :src=cliente.foto height="200px" cover></v-img>
+      <div class="card-image">
+        <v-img :src="cliente.foto" height="200px" cover></v-img>
+        <v-btn :icon="true" class="delete-icon bg-red  mt-2 mr-2" @click="eliminarCliente(cliente.id)">
+          <v-icon>mdi-delete</v-icon>
+        </v-btn>
+      </div>
       <v-card-title>
         {{ cliente.nombreDueño }}
       </v-card-title>
@@ -179,6 +252,13 @@ const irAcliente = (idCliente) => {
   flex-wrap: wrap;
   justify-content: left;
 }
+.delete-icon {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+
 .sin-mantenciones {
   margin-top: 1rem;
   text-align: center;
