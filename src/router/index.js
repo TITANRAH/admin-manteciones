@@ -111,6 +111,24 @@ const router = createRouter({
       component: () => import('../views/CobrosPendientesView.vue'),
       meta: {requiresAuth: true}
     },
+    {
+      path: '/contabilidad-finanzas',
+      name: 'contabilidad-finanzas',
+      component: () => import('../views/ContabilidadFinanzasView.vue'),
+      meta: {requiresAuth: true}
+    },
+    {
+      path: '/contabilidad-finanzas/:id',
+      name: 'item-contabilidad-finanza',
+      component: () => import('../views/ItemContabilidadFinanzaView.vue'),
+      meta: {requiresAuth: true}
+    },
+    {
+      path: '/detalles-mantenciones-mes',
+      name: 'detalles-mantenciones-mes',
+      component: () => import('../views/DetalleMantencionesPorMesView.vue'),
+      meta: {requiresAuth: true}
+    },
 
 
    

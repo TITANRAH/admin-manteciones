@@ -1,15 +1,11 @@
 <script setup>
-import { addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
-import { useField, useForm } from 'vee-validate';
-import { ref, computed, onMounted, watch } from 'vue';
+import { doc, getDoc, updateDoc, addDoc, collection, deleteDoc } from 'firebase/firestore';
+import Swal from 'sweetalert2';
+import { useField } from 'vee-validate';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useFirestore } from 'vuefire';
-import { costosSchema } from '../validations/costosSchema';
-import { propertyPrice, formatedDate } from '../helpers/index';
-import Swal from 'sweetalert2';
-
-
-
+import { formatedDate, propertyPrice } from '../helpers/index';
 
 const route = useRoute()
 const router = useRouter()
@@ -28,10 +24,7 @@ const patenteVehiculo = ref('')
 const descripcionServicio = ref('')
 const fechaDeMantencion = ref('')
 const isNotMobile = ref(false)
-
-
-
-
+const documento = ref({})
 const costos = ref([])
 
 console.log('id costo', route.params.idCosto)
@@ -48,16 +41,15 @@ const nuevoCosto = ref({
     estadoPagoCosto: estadoPagoCosto.value.value
 })
 
-
 const handleResize = () => {
-  const mobileThreshold = 900; // Puedes ajustar este valor según tus necesidades
-  isNotMobile.value = window.innerWidth >= mobileThreshold;
+    const mobileThreshold = 900;
+    isNotMobile.value = window.innerWidth >= mobileThreshold;
 };
 
 onMounted(async () => {
-    handleResize(); // Ejecuta la función cuando se monta el componente
-  window.addEventListener('resize', handleResize); 
-    
+    handleResize();
+    window.addEventListener('resize', handleResize);
+
     const idMantencion = route.params.idMantencion;
     const idCliente = route.params.idCliente;
     const idCosto = route.params.idCosto;
@@ -76,13 +68,10 @@ onMounted(async () => {
     if (costoDocSnap.exists()) {
         costos.value = costoDocSnap.data();
         console.log('costo en costoView', costos.value);
-
     } else {
         console.log('El documento de costo no existe');
     }
-
     console.log('Costo:', costos.value.costos);
-
 
     for (const costo of costos.value.costos) {
         const nuevoCosto = {
@@ -92,8 +81,6 @@ onMounted(async () => {
             estadoPagoCosto: costo.estadoPagoCosto
         };
         costosAsociados.value.push(nuevoCosto)
-
-
     }
 
 
@@ -121,16 +108,10 @@ onMounted(async () => {
         fechaDeMantencion.value = mantencionData.fechaMantencion;
         descripcionServicio.value = mantencionData.detallesVehiculo;
     }
-
-
-
-    // Verificar si todos los campos estadoPagoCosto son true
     costosAsociados.value.every(
         (costo) => {
             if (costo.estadoPagoCosto === true) {
-                console.log('si vienen todos en true')
-
-                // Establecer el valor de showButtonFinishCost en consecuencia
+                console.log('si vienen todos en true')     
                 showButtonFinishCost.value = true;
             } else {
 
@@ -140,13 +121,7 @@ onMounted(async () => {
             }
         }
     );
-
-
-
-
 });
-
-console.log('costosAsociados', costosAsociados.value)
 
 const pendiente = computed(() => {
     return costosAsociados.value.reduce((total, costo) => {
@@ -180,15 +155,6 @@ const addCosto = () => {
     showButtonActions.value = false;
     const fecha = new Date()
     const fechaString = fecha.toISOString()
-    // const options = {
-    //     year: 'numeric',
-    //     month: 'long',
-    //     day: 'numeric',
-    //     hour: 'numeric',
-    //     minute: 'numeric',
-    //     second: 'numeric',
-    //     timeZone: 'America/Santiago'
-    // };
     nuevoCosto.value = {
         fecha: formatedDate(fechaString),
         nombreServicio: nombreServicio.value.value,
@@ -215,8 +181,6 @@ const submitUpdateCost = async (event) => {
     console.log('paso por actualizar primero')
     event.preventDefault();
 
-    // Validar que los campos no sean null, vacíos o undefined
-
     console.log(costosAsociados.value)
     const camposInvalidos = costosAsociados.value.some(costo => {
         return (
@@ -226,7 +190,7 @@ const submitUpdateCost = async (event) => {
             costo.valorServicio === null ||
             costo.valorServicio === '' ||
             costo.valorServicio === undefined
-            // Agrega aquí más campos que deseas validar
+            
         );
     });
 
@@ -237,12 +201,9 @@ const submitUpdateCost = async (event) => {
             icon: 'error',
             confirmButtonText: 'Aceptar'
         });
-        return; // Detener el proceso si hay campos inválidos
+        return;
     }
 
-    //   const hayCostosSinPagar = costosAsociados.value.some(costo => costo.estadoPagoCosto !== true);
-
-    //   if (!hayCostosSinPagar) {
     Swal.fire({
         title: 'Confirmación',
         text: '¿Estás seguro de actualizar estos costos antes de finalizar?',
@@ -295,22 +256,9 @@ const submitUpdateCost = async (event) => {
                 });
         }
     });
-    //   } else {
-    //     console.log('aún hay costos sin pagar');
-    //     Swal.fire({
-    //       title: 'Atención',
-    //       text: 'Hay uno o más costos sin pagar',
-    //       icon: 'warning',
-    //       confirmButtonText: 'Aceptar'
-    //     });
-    //   }
 };
 
 const submitFinishedCost = (event) => {
-
-
-
-
     const camposInvalidos = costosAsociados.value.some(costo => {
         return (
             costo.nombreServicio === null ||
@@ -318,11 +266,9 @@ const submitFinishedCost = (event) => {
             costo.nombreServicio === undefined ||
             costo.valorServicio === null ||
             costo.valorServicio === '' ||
-            costo.valorServicio === undefined
-            // Agrega aquí más campos que deseas validar
+            costo.valorServicio === undefined      
         );
     });
-
     if (camposInvalidos) {
         Swal.fire({
             title: 'Error',
@@ -330,15 +276,11 @@ const submitFinishedCost = (event) => {
             icon: 'error',
             confirmButtonText: 'Aceptar'
         });
-        return; // Detener el proceso si hay campos inválidos
+        return; 
     }
-
-
     event.preventDefault()
     const todosPagados = costosAsociados.value.every(costo => costo.estadoPagoCosto == true);
-
     if (todosPagados) {
-
         const costoRef = doc(
             db,
             'clientes',
@@ -357,7 +299,6 @@ const submitFinishedCost = (event) => {
             cancelButtonText: 'Cancelar'
         }).then((result) => {
             if (result.isConfirmed) {
-
                 for (const costo of costosAsociados.value) {
                     if (
                         costo.estadoPagoCosto === undefined ||
@@ -383,12 +324,12 @@ const submitFinishedCost = (event) => {
 
                     Swal.fire({
                         title: 'Costo guardado',
-                        text: 'El costo se ha guardado en finanzas',
+                        text: 'El costo se ha guardado en finanzas y se eliminó esta Mantención',
                         icon: 'success',
                         confirmButtonText: 'Aceptar'
                     }).then(() => {
-                        // Redirigir a otra página
-                        router.push('/otra-pagina');
+                      
+                        router.push({name: 'contabilidad-finanzas'});
                     });
                 }
             }
@@ -404,12 +345,10 @@ const submitFinishedCost = (event) => {
 }
 
 const guardarDocumentoContabilidad = async (costosAsociados, valorContable) => {
-
-
     const fecha = new Date()
     const fechaString = fecha.toISOString()
     console.log(typeof fechaString);
-    const documento = {
+    documento.value = {
         idCliente: route.params.idCliente,
         idMantencion: route.params.idMantencion,
         idCosto: route.params.idCosto,
@@ -422,28 +361,41 @@ const guardarDocumentoContabilidad = async (costosAsociados, valorContable) => {
         fechaDeMantencion: fechaDeMantencion.value,
         fechaFinalizacionCostos: formatedDate(fechaString),
         costosAsociados: costosAsociados,
-        valorContable: valorContable
+        valorContable: valorContable,
+        descripcionServicio: descripcionServicio.value
     }
 
-    console.log('documento final', documento)
-    //   try {
-    //     const docRef = await addDoc(collection(db, 'ContabilidadMantenciones'), {
-    //       fechaFinalizacion,
-    //       costosAsociados,
-    //       valorContable
-    //     });
-    //     console.log('Documento guardado en ContabilidadMantenciones con ID:', docRef.id);
-    //   } catch (error) {
-    //     console.error('Error al guardar el documento en ContabilidadMantenciones:', error);
-    //   }
+    try {
+        const docRef = await addDoc(collection(db, 'ContabilidadMantencionesFinalizadas'), {
+            ...documento.value
+        });
+        console.log('Documento guardado en ContabilidadMantenciones con ID:', docRef.id);     
+        if (docRef.id) {
+            await deleteManCost(documento.value.idCliente, documento.value.idMantencion, documento.value.idCosto)
+        }
+
+    } catch (error) {
+        console.error('Error al guardar el documento en ContabilidadMantenciones:', error);
+    }
 };
+
+
+const deleteManCost = async (idCliente, idMantencion, idCosto) => {
+
+    const mantencionRef = doc(db, 'clientes', idCliente, 'mantenciones', idMantencion);
+    await deleteDoc(mantencionRef);
+    console.log('Documento de mantencion eliminado con éxito');
+    const costomantencionRef = doc(db, 'clientes', idCliente, 'mantenciones', idMantencion, 'costosMantencion', idCosto);
+    await deleteDoc(costomantencionRef);
+    console.log('Documento de costomantencion eliminado con éxito');
+
+}
 
 watch(
     costosAsociados.value,
     (newCostos, oldCostos) => {
         if (newCostos) {
             const hayAlMenosUnFalse = newCostos.some(costo => costo.estadoPagoCosto === false);
-
             showButtonFinishCost.value = !hayAlMenosUnFalse;
         }
     }
@@ -453,13 +405,12 @@ watch(
 <template>
     <v-form>
         <div>
-
-            <v-btn class="bg-indigo" :to="{name:'calendario-general'}">Ir a calendario</v-btn>
+            <v-btn class="bg-indigo" :to="{ name: 'calendario-general' }">Ir a calendario</v-btn>
             <v-card-subtitle class="text-h5 py-5 px-3 text-indigo">
                 Finalizar costos Asociados
             </v-card-subtitle>
 
-            <v-table  v-if="isNotMobile" class="tabla">
+            <v-table v-if="isNotMobile" class="tabla">
                 <thead>
                     <tr>
                         <th class="text-left">
@@ -471,18 +422,9 @@ watch(
                         <th class="text-left">
                             Estado
                         </th>
-                        <!-- <th class="text-left">
-
-                            <v-row class="acciones">
-                                <p>Acciones</p>
-                                <v-btn v-if="showButtonActions" class="mb-3 mt-2 mr-2 ml-5" color="green" icon>
-                                    <v-icon @click="addCosto()">mdi-plus</v-icon>
-                                </v-btn>
-                            </v-row>
-                        </th> -->
                     </tr>
                 </thead>
-                <tbody >
+                <tbody>
                     <tr v-for="(costo, index) in costosAsociados" :key="index">
                         <td><v-text-field v-model="costo.nombreServicio"
                                 :error-messages="nombreServicio.errorMessage.value"></v-text-field></td>
@@ -504,8 +446,6 @@ watch(
 
                         </td>
                     </tr>
-
-
                 </tbody>
             </v-table>
 
@@ -517,34 +457,31 @@ watch(
                         <v-list-item-subtitle><v-text-field v-model="costo.nombreServicio"
                                 :error-messages="nombreServicio.errorMessage.value"></v-text-field>
                         </v-list-item-subtitle>
-                        <v-list-item-subtitle> <v-text-field v-model="costo.valorServicio" :error-messages="valorServicio.errorMessage.value">$
+                        <v-list-item-subtitle> <v-text-field v-model="costo.valorServicio"
+                                :error-messages="valorServicio.errorMessage.value">$
                             </v-text-field></v-list-item-subtitle>
                         <v-list-item-subtitle><v-switch v-model="costo.estadoPagoCosto" hide-details inset
                                 :label="`${(costo.estadoPagoCosto == undefined || costo.estadoPagoCosto == 'No Pagado' || costo.estadoPagoCosto == false ? 'Pendiente' : 'Pagado')}`">
                             </v-switch></v-list-item-subtitle>
-                     <v-row class="botones-movil">
-                        <v-col class="col">
-                            <v-btn class="mb-3 mt-2 mr-2" color="red" icon>
-                                <v-icon @click="removeCosto(index)">mdi-minus-thick</v-icon>
-                            </v-btn>
-                          
-                        </v-col>
-                        <v-col class="col">
-                            <v-btn class="mb-3 mt-2 mr-2 ml-5" color="green" icon>
-                                <v-icon @click="addCosto()">mdi-plus</v-icon>
-                            </v-btn>
+                        <v-row class="botones-movil">
+                            <v-col class="col">
+                                <v-btn class="mb-3 mt-2 mr-2" color="red" icon>
+                                    <v-icon @click="removeCosto(index)">mdi-minus-thick</v-icon>
+                                </v-btn>
 
-                        </v-col>
-                     </v-row>
+                            </v-col>
+                            <v-col class="col">
+                                <v-btn class="mb-3 mt-2 mr-2 ml-5" color="green" icon>
+                                    <v-icon @click="addCosto()">mdi-plus</v-icon>
+                                </v-btn>
+
+                            </v-col>
+                        </v-row>
                     </v-list-item>
 
                 </v-list>
             </v-card>
-
-
         </div>
-
-
         <v-card class="mt-6" elevation="0">
 
             <v-card-subtitle class="text-h5 py-5 px-3 text-indigo">
@@ -570,14 +507,12 @@ watch(
                     <tr v-for="(costo, index) in costosAsociados" :key="index">
                         <td>{{ costo.nombreServicio }}</td>
                         <td>$ {{ costo.valorServicio }}</td>
-                        <td :class="costo.estadoPagoCosto ? 'bg-green' : 'bg-red'">{{ costo.estadoPagoCosto ? 'Pagado' : 'Pendiente' }}</td>
+                        <td :class="costo.estadoPagoCosto ? 'bg-green' : 'bg-red'">{{ costo.estadoPagoCosto ? 'Pagado' :
+                            'Pendiente' }}</td>
                     </tr>
                 </tbody>
             </v-table>
         </v-card>
-
-
-
         <v-card v-if="costos.value != []" class=" mx-auto mt-5" max-width="500">
             <v-card-subtitle class="text-h5 py-5 px-3 text-indigo">
                 Contabilidad
@@ -602,7 +537,8 @@ watch(
                     <tr v-for="(costo, index) in costosAsociados" :key="index">
                         <td>{{ costo.nombreServicio }}</td>
                         <td>$ {{ costo.valorServicio ? propertyPrice(costo.valorServicio) : 0 }}</td>
-                        <td :class="costo.estadoPagoCosto ? 'bg-green' : 'bg-red'">{{ costo.estadoPagoCosto ? 'Pagado' : 'Pendiente' }}</td>
+                        <td :class="costo.estadoPagoCosto ? 'bg-green' : 'bg-red'">{{ costo.estadoPagoCosto ? 'Pagado' :
+                            'Pendiente' }}</td>
                     </tr>
                 </tbody>
             </v-table>
@@ -619,25 +555,15 @@ watch(
             </div>
 
         </v-card>
-
-
         <div v-if="showButtonFinishCost" class="boton mt-6 ">
             <v-btn block color="green" class="w-50" @click="submitFinishedCost($event)">Finalizar costos asociados</v-btn>
 
         </div>
-
-
         <div v-else class="boton mt-6">
             <v-btn block color="pink" @click="submitUpdateCost($event)">Editar Valores o Pendientes</v-btn>
         </div>
-
-
-
     </v-form>
 </template>
-
-
-
 
 
 <style>
@@ -663,17 +589,7 @@ watch(
     justify-content: right;
 }
 
-.botones-movil{
-    display: flex;
-    flex-direction: row;
-    margin: auto;
-    align-items: center;
-    align-content: center;
-    justify-content: center;
-    
-}
-
-.col{
+.botones-movil {
     display: flex;
     flex-direction: row;
     margin: auto;
@@ -682,4 +598,13 @@ watch(
     justify-content: center;
 
 }
-</style>
+
+.col {
+    display: flex;
+    flex-direction: row;
+    margin: auto;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+
+}</style>
