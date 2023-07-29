@@ -1,34 +1,22 @@
-
 <template>
-  <v-container class="dashboard-container" fluid>
-    <v-row justify="center">
-      <v-col v-for="card in cards" :key="card.title" cols="12" md="6" lg="4">
-        <v-card class="dashboard-card" @click="goToRoute(card.route)">
-          <v-sheet
-            class="dashboard-card-content"
-            :color="card.backgroundColor"
-            height="100%"
-            rounded
-          >
-            <v-row align="center" justify="center" class="fill-height">
-              <v-icon class="mr-3">{{ card.icono }}</v-icon>
-              <v-col>
-                <v-card-title class="text-center">{{ card.title }}</v-card-title>
-              </v-col>
-            </v-row>
-          </v-sheet>
-          <v-card-text>{{ card.description }}</v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-container>
+   <h2 class="reporte-title text-indigo" > <u>DASHBOARD</u> </h2>
+  <div class="dashboard-container">
+
+   
+    <div class="dashboard-card" v-for="card in cards" :key="card.title" @click="goToRoute(card.route)">
+      <div class="dashboard-card-content" :style="{ backgroundColor: card.backgroundColor }">
+        <v-icon class="material-icons" style="font-size: 50px;">{{ card.icono }}</v-icon>
+        <div class="card-title">{{ card.title }}</div>
+        <div class="card-description">{{ card.description }}</div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { ref } from 'firebase/storage';
 import { useRouter } from 'vue-router';
-const router = useRouter()
-
+const router = useRouter();
 
 const cards = ref([
   {
@@ -63,19 +51,20 @@ const cards = ref([
 ]);
 
 function goToRoute(route) {
- router.push({name: route})
+  router.push({ name: route });
 }
 </script>
 
 <style scoped>
 .dashboard-container {
   padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-gap: 20px;
 }
 
 .dashboard-card {
   cursor: pointer;
-  margin-bottom: 20px;
-  height: 100%;
 }
 
 .dashboard-card-content {
@@ -85,12 +74,31 @@ function goToRoute(route) {
   align-items: center;
   text-align: center;
   height: 100%;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease;
 }
 
-/* Estilos para el tamaño de las cajas en vista móvil */
-@media (max-width: 599px) {
-  .dashboard-card {
-    height: auto;
-  }
+.dashboard-card-content:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.material-icons {
+  margin-bottom: 10px;
+  color: white;
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: white;
+}
+
+.card-description {
+  font-size: 14px;
+  color: #555;
+  color: white;
 }
 </style>

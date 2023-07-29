@@ -399,7 +399,7 @@ const eventosFiltrados = computed(() => {
     <!-- Modal de Vuetify para mostrar detalles del evento -->
     <v-dialog v-model="eventModalOpen" max-width="500px">
     
-      <v-card>
+      <v-card max-width="800">
         <v-btn text @click="eventModalOpen = false">Cerrar</v-btn>
         <v-card-title>
           {{ selectedEvent.title }}

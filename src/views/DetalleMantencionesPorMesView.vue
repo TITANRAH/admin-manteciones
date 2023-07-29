@@ -1,8 +1,28 @@
         
 <script setup>
 import { formatedDate, propertyPrice } from '@/helpers';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useContabilidadStore } from '../stores/contabilidad';
+import { useRoute } from 'vue-router';
+const route = useRoute()
+
+console.log(route.params.mes)
+
+const nombresMeses = {
+    '01': 'Enero',
+    '02': 'Febrero',
+    '03': 'Marzo',
+    '04': 'Abril',
+    '05': 'Mayo',
+    '06': 'Junio',
+    '07': 'Julio',
+    '08': 'Agosto',
+    '09': 'Septiembre',
+    '10': 'Octubre',
+    '11': 'Noviembre',
+    '12': 'Diciembre',
+    // y así sucesivamente para los otros meses
+};
 
 
 const isMobile = ref(false)
@@ -16,13 +36,21 @@ const handleResize = () => {
 onMounted(() => {
     handleResize();
     window.addEventListener('resize', handleResize);
+
+
+})
+
+const mesConsulta = computed(()=>{
+    return nombresMeses[route.params.mes]
 })
 
 </script>
 <template>
       <v-btn class="bg-indigo" :to="{ name: 'dashboard' }">Ir a Dashboard</v-btn>
-    <v-card-subtitle class="text-h5 py-5 text-indigo">
-        Detalle Mantenciones
+
+      <v-text-field v-model="store.searchTerm" label="Buscar por nombre o patente" class=" mt-4"></v-text-field>
+    <v-card-subtitle class="text-h5 py-3 text-indigo">
+     Detalle mes:  <b>{{ mesConsulta }}</b> 
     </v-card-subtitle>
     <table v-if="!isMobile" class="table">
         <thead>
@@ -35,12 +63,12 @@ onMounted(() => {
             </tr>
         </thead>
         <tbody>
-            <tr v-for="(mantencion, index) in store.mantencionesPorMes" :key="index">
+            <tr v-for="(mantencion, index) in store.filterMantencionPorMes" :key="index">
                 <td>{{ mantencion.nombreCliente }}</td>
                 <td>{{ mantencion.patenteVehiculo }}</td>
                 <td>{{ propertyPrice(mantencion.valorContable) }}</td>
                 <td>{{ formatedDate(mantencion.fechaDeMantencion) }}</td>
-                <td><v-btn icon><v-icon>mdi-eye-outline</v-icon></v-btn></td>
+                <td><v-btn icon :to="{name: 'item-contabilidad-finanza', params:{ id: mantencion.id}}"><v-icon>mdi-eye-outline</v-icon></v-btn></td>
             </tr>
         </tbody>
     </table>
@@ -71,7 +99,7 @@ onMounted(() => {
                     <b> {{ formatedDate(mantencion.fechaDeMantencion) }}</b>
                 </v-list-item-subtitle>
                 <v-list-item-subtitle class="mb-2">
-                    <v-btn class="text-indigo" elevation="0"><v-icon class="mr-1">mdi-eye</v-icon> Ver más</v-btn>
+                    <v-btn class="text-indigo" elevation="0" :to="{name: 'item-contabilidad-finanza', params:{ id: mantencion.id}}"><v-icon class="mr-1">mdi-eye</v-icon> Ver más</v-btn>
                 </v-list-item-subtitle>
 
 

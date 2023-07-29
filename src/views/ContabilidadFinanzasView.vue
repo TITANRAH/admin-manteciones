@@ -1,5 +1,5 @@
 <script setup>
-import ContabilidadFinanza from '../components/ContabilidadFinanza.vue';
+
 import { useContabilidadStore } from '../stores/contabilidad';
 import { propertyPrice } from '@/helpers';
 import { RouterLink } from 'vue-router';
@@ -37,18 +37,15 @@ const nombresMeses = {
                     <v-list-item v-for="(ganancia, mes) in contabilidad.gananciasPorMes" :key="mes">
       
                             <v-list-item-title >
-                                {{ nombresMeses[mes.split('-')[0]] }} - Ganancia: {{ propertyPrice(ganancia) }}
+                                {{ nombresMeses[mes.split('-')[0]] }} - Ganancia: <b>{{ propertyPrice(ganancia) }}</b> 
                             </v-list-item-title>
                             
                             <v-list-item-subtitle class="mt-1">
                                Mantenciones: {{ contabilidad.cantidadMantencionesPorMes[mes] || 0 }}
 
-                                <v-btn elevation="0" class="" @click="contabilidad.verDetallePorMes(mes)">ir a detalle</v-btn>
+                                <v-btn elevation="0" class="text-indigo" @click="contabilidad.verDetallePorMes(mes)"> <b>ir a detalle</b> <v-icon class="ml-2">mdi-eye-outline</v-icon> </v-btn>
                             </v-list-item-subtitle>
-                            <v-divider class="mt-1"></v-divider>
-                    
-                          
-                       
+                            <v-divider class="mt-1"></v-divider>                   
                     </v-list-item>
                 </v-list>
             </v-list>

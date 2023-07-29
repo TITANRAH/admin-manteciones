@@ -124,7 +124,7 @@ const router = createRouter({
       meta: {requiresAuth: true}
     },
     {
-      path: '/detalles-mantenciones-mes',
+      path: '/detalles-mantenciones-mes/:mes',
       name: 'detalles-mantenciones-mes',
       component: () => import('../views/DetalleMantencionesPorMesView.vue'),
       meta: {requiresAuth: true}

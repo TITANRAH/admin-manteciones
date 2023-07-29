@@ -107,6 +107,7 @@ onMounted(async () => {
         const mantencionData = mantencionDocSnap.data();
         fechaDeMantencion.value = mantencionData.fechaMantencion;
         descripcionServicio.value = mantencionData.detallesVehiculo;
+        
     }
     costosAsociados.value.every(
         (costo) => {

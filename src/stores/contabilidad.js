@@ -15,6 +15,7 @@ export const useContabilidadStore = defineStore('contabilidad', () => {
     const contabilidadMantenciones = ref([])
     const mantencionesPorMes = ref([])
     const selectedYear = ref(new Date().getFullYear().toString());
+    const searchTerm = ref('')
 
    
 
@@ -89,12 +90,23 @@ export const useContabilidadStore = defineStore('contabilidad', () => {
           return mesAño === mes;
         });
 
-        router.push({name: 'detalles-mantenciones-mes'})
+        router.push({name: 'detalles-mantenciones-mes', params:{mes: mes.split('-')[0]}})
       
         // Hacer algo con el array de mantencionesPorMes, por ejemplo, mostrarlo en una tabla
         console.log(mantencionesPorMes.value);
         // Aquí puedes redirigir a otra página o mostrar el detalle de mantenciones de alguna manera
       }
+
+      const filterMantencionPorMes = computed(() => {
+        const searchTermLower = searchTerm.value.toLowerCase().trim();
+        return mantencionesPorMes.value.filter(m => {
+          const nombreLower = m?.nombreCliente?.toLowerCase() || '';
+          const patenteLower = m?.patenteVehiculo?.toLowerCase() || '';
+          return nombreLower.includes(searchTermLower) || patenteLower.includes(searchTermLower);
+        });
+      });
+
+
 
     return {
         fetchContabilidadMantenciones,
@@ -105,7 +117,9 @@ export const useContabilidadStore = defineStore('contabilidad', () => {
         logSelectedYear,
         cantidadMantencionesPorMes,
         verDetallePorMes,
-        mantencionesPorMes
+        mantencionesPorMes,
+        searchTerm,
+        filterMantencionPorMes
      
     }
  
