@@ -1,12 +1,12 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import { collection, getDocs, getDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
-import { useFirestore, useFirebaseStorage } from 'vuefire';
-import { ref as storageRef, deleteObject } from 'firebase/storage'
-import useMantenciones from '../composables/useMaintenance';
-import { useRouter } from 'vue-router';
-import Swal from 'sweetalert2';
 import { formatedDate } from '@/helpers';
+import { collection, deleteDoc, doc, getDoc, getDocs, updateDoc } from 'firebase/firestore';
+import { deleteObject, ref as storageRef } from 'firebase/storage';
+import Swal from 'sweetalert2';
+import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useFirebaseStorage, useFirestore } from 'vuefire';
+import useMantenciones from '../composables/useMaintenance';
 const router = useRouter()
 const { sendMailDialog, enviarWhatsapp, sendMail } = useMantenciones();
 const db = useFirestore();
@@ -224,9 +224,9 @@ const eliminarCliente = async (clienteId) => {
 </script>
 <template>
   <v-btn class="bg-indigo mb-5" :to="{ name: 'dashboard' }">Ir a Dashboard</v-btn>
-  <v-text-field v-model="searchTerm" label="Buscar por nombre o patente" class="mb-4"></v-text-field>
+  <v-text-field v-if="filteredClientes.length != 0" v-model="searchTerm" label="Buscar por nombre o patente" class="mb-4"></v-text-field>
   <v-card-subtitle class="text-h5 py-5 px-3 text-indigo mb-6">
-    Tus Clientes
+   {{filteredClientes.length != 0 ? 'Tus Clientes' : 'Sin Clientes aún, ve a crear Cliente'  }} 
   </v-card-subtitle>
   <div class="cards">
     <v-card class="mx-auto mb-4 card" :class="cliente.mantencionesRealizadas.contactarCliente ? 'bg-red' : 'bg-indigo'"

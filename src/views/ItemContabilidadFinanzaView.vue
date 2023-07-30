@@ -3,7 +3,8 @@ import { ref, onMounted } from 'vue';
 import { useFirestore } from 'vuefire';
 import { doc, getDoc } from "firebase/firestore";
 import { useRoute } from 'vue-router';
-import { propertyPrice } from '@/helpers';
+import { propertyPrice, formatedDate } from '@/helpers';
+
 
 
 const route = useRoute();
@@ -60,7 +61,7 @@ onMounted(async () => {
 
     <v-card v-if="existe" max-width="1190">
         <v-card-title>Nombre Cliente: {{ conta.nombreCliente }}</v-card-title>
-        <v-card-subtitle>Fecha de Mantención: {{ conta.fechaDeMantencion }}</v-card-subtitle>
+        <v-card-subtitle>Fecha de Mantención: {{ formatedDate(conta.fechaDeMantencion) }}</v-card-subtitle>
 
         <v-tabs v-model="tab" grow>
             <v-tab value="General">General</v-tab>
@@ -73,14 +74,24 @@ onMounted(async () => {
                 <v-col cols="12" md="6">
                     <p><strong>Descripción del servicio:</strong> {{ conta.descripcionServicio == '' ? 'Sin detalles' :
                         conta.descripcionServicio }}</p>
+                    <p><strong>Tipo de aceite:</strong> {{ conta.aceiteDescripcion == '' ? 'Sin detalles' :
+                        conta.aceiteDescripcion }}</p>
+                    <p><strong>Cambio de Aceite cada:</strong> {{ conta.cambioAceite == '10000' ? conta.cambioAceite + ' Km' :
+                        '15000 Km' }}</p>
+                    <p><strong>Inspección visual de motor:</strong> {{ conta.inspeccionVisualMotor == true ? 'Si' :
+                        'No' }}</p>
+                    <p><strong>Uso Familiar:</strong> {{ conta.usoFamiliar == true ? 'Si' :
+                        'No' }}</p>
+                    <p><strong>Uso Laboral:</strong> {{ conta.usoLaboral == true ? 'Si' :
+                        'No' }}</p>
                     <p><strong>Teléfono del cliente:</strong> {{ conta.fonoCliente == '' ? 'Sin Teléfono' :
                         conta.fonoCliente }}</p>
                     <p><strong>Correo del cliente:</strong> {{ conta.correoCliente == '' ? 'Sin Correo' :
                         conta.correoCliente }}</p>
                     <p><strong>Valor contable:</strong> {{ propertyPrice(conta.valorContable) }}</p>
                     <p><strong>Fecha finalización costos:</strong> {{ conta.fechaFinalizacionCostos }}</p>
-                    <p><strong>Kilometraje del auto:</strong> {{ conta.kmAuto }}</p>
-                    <p><strong>Patente del vehículo:</strong> {{ conta.patenteVehiculo }}</p>
+                    <p><strong>Kilometraje del auto:</strong> {{ conta.kmAuto == '' ? 'Sin detalles' : conta.kmAuto + ' Km' }}</p>
+                    <p><strong>Patente del vehículo:</strong> {{ conta.patenteVehiculo == '' ? 'Sin detalles' : conta.patenteVehiculo }}</p>
                 </v-col>
             </v-row>
         </v-card-text>

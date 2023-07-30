@@ -189,7 +189,7 @@ onUnmounted(() => {
   </div>
 
   <div v-else  class="cobros-pendientes-box">
-    <div v-if="clientesUnique.length == []" class="sk-chase">
+    <div v-if="loadingValue" class="sk-chase">
       <div class="sk-chase-dot"></div>
       <div class="sk-chase-dot"></div>
       <div class="sk-chase-dot"></div>
@@ -197,9 +197,13 @@ onUnmounted(() => {
       <div class="sk-chase-dot"></div>
       <div class="sk-chase-dot"></div>
     </div>
+    <div v-if="!loadingValue && clientesUnique.length == []" class="text-indigo">
+        <v-btn class="bg-indigo mb-5" :to="{ name: 'contabilidad-finanzas' }">Ir a mis Finanzas</v-btn>
+      </div>
     <v-card v-else class="mt-3" v-for="(cliente, index) in clientesUnique" :key="index" max-width="800">
+
       <v-list>
-        
+
           <v-list-item class="cobros-pendientes-box">
             <v-list-item-title><b>{{ cliente.nombre }}</b> </v-list-item-title>
             <v-list-item-subtitle>Patente:<b>{{ cliente.patente }}</b>

@@ -20,6 +20,11 @@ const nombreCliente = ref('')
 const correoCliente = ref('')
 const fonoCliente = ref('')
 const kmAuto = ref('')
+const usoFamiliar = ref(null)
+const usoLaboral = ref(null)
+const aceiteDescripcion = ref('')
+const cambioAceite = ref('')
+const inspeccionVisualMotor= ref(null)
 const patenteVehiculo = ref('')
 const descripcionServicio = ref('')
 const fechaDeMantencion = ref('')
@@ -107,6 +112,11 @@ onMounted(async () => {
         const mantencionData = mantencionDocSnap.data();
         fechaDeMantencion.value = mantencionData.fechaMantencion;
         descripcionServicio.value = mantencionData.detallesVehiculo;
+        usoFamiliar.value = mantencionData.usoFamiliar;
+        usoLaboral.value = mantencionData.usoLaboral;
+        aceiteDescripcion.value = mantencionData.aceiteDescripcion
+        cambioAceite.value = mantencionData.cambioAceite
+        inspeccionVisualMotor.value = mantencionData.inspeccionVisualMotor
         
     }
     costosAsociados.value.every(
@@ -363,7 +373,12 @@ const guardarDocumentoContabilidad = async (costosAsociados, valorContable) => {
         fechaFinalizacionCostos: formatedDate(fechaString),
         costosAsociados: costosAsociados,
         valorContable: valorContable,
-        descripcionServicio: descripcionServicio.value
+        descripcionServicio: descripcionServicio.value,
+        usoLaboral: usoLaboral.value,
+        usoFamiliar: usoFamiliar.value,
+        aceiteDescripcion: aceiteDescripcion.value,
+        cambioAceite: cambioAceite.value,
+        inspeccionVisualMotor: inspeccionVisualMotor.value
     }
 
     try {
