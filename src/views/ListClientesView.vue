@@ -197,7 +197,7 @@ const eliminarCliente = async (clienteId) => {
     Tus Clientes
   </v-card-subtitle>
   <div class="cards" >
-    <v-card class="mx-auto mb-4 bg-indigo card" min-width="250" v-for="(cliente, index) in filteredClientes" :key="index">
+    <v-card class="mx-auto mb-4 bg-indigo card" max-width="800" v-for="(cliente, index) in filteredClientes" :key="index">
       <div class="card-image">
         <v-img :src="cliente.foto" height="200px" cover></v-img>
         <v-btn :icon="true" class="delete-icon bg-red  mt-2 mr-2" @click="eliminarCliente(cliente.id)">
@@ -225,7 +225,7 @@ const eliminarCliente = async (clienteId) => {
         </v-row>
       </v-card-subtitle>
       <v-dialog v-model="dialog" max-width="500px">
-        <v-card>
+        <v-card max-width="800">
           <v-card-title>Enviar correo</v-card-title>
           <v-card-text>
             <v-form ref="emailForm">
