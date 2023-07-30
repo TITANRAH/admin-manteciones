@@ -7,6 +7,8 @@ import { useField, useForm} from 'vee-validate';
 import { useRouter } from 'vue-router';
 import { useFirestore } from 'vuefire';
 import Swal from 'sweetalert2';
+import { ref } from 'vue';
+
 
 const { handleSubmit } = useForm({
 
@@ -26,6 +28,9 @@ const kmVehiculo = useField('kmVehiculo')
 const fonoDueño = useField('fonoDueño')
 const direccionDueño = useField('direccionDueño')
 const imagenVehiculo = useField('imagenVehiculo')
+
+const showBotonAgregarMantencion = ref(true)
+const idClienteCreado = ref(null)
 
 
 const años = [1990, 1991, 1992, 1993, 1994, 1995, 
@@ -58,6 +63,10 @@ const docRef = await addDoc(collection(db, "clientes"), {
 
 if (docRef.id) {
   console.log('docRef.id', docRef.id)
+
+  idClienteCreado.value = docRef.id
+
+  showBotonAgregarMantencion.value = false;
 
   Swal.fire({
       title: 'Guardado correctamente, ¿Deseas crear una Mantención?',
@@ -150,8 +159,11 @@ if (docRef.id) {
         </v-row>
   
   
-        <v-btn color="pink-accent-3" block @click="submit">
+        <v-btn v-if="showBotonAgregarMantencion" color="pink-accent-3" block @click="submit">
           Agregar Cliente
+        </v-btn>
+        <v-btn v-else color="pink-accent-3" block :to="{name: 'crear-mantencion',params: {id:idClienteCreado} }">
+          Crear Mantención
         </v-btn>
   
       </v-form>
