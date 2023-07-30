@@ -406,7 +406,7 @@ watch(
 <template>
     <v-form>
         <div>
-            <v-btn class="bg-indigo" :to="{ name: 'calendario-general' }">Ir a calendario</v-btn>
+            <v-btn class="bg-indigo" :to="{ name: 'cobros-pendientes' }">Ir a Pendientes</v-btn>
             <v-card-subtitle class="text-h5 py-5 px-3 text-indigo">
                 Finalizar costos Asociados
             </v-card-subtitle>
@@ -422,6 +422,9 @@ watch(
                         </th>
                         <th class="text-left">
                             Estado
+                        </th>
+                        <th class="text-left">
+                            Acciones
                         </th>
                     </tr>
                 </thead>
@@ -483,37 +486,7 @@ watch(
                 </v-list>
             </v-card>
         </div>
-        <v-card class="mt-6" elevation="0">
 
-            <v-card-subtitle class="text-h5 py-5 px-3 text-indigo">
-                Contabilidad
-            </v-card-subtitle>
-            <v-table>
-
-                <thead>
-                    <tr>
-                        <th class="text-left">
-                            Servicio
-                        </th>
-                        <th class="text-left">
-                            Valor
-                        </th>
-                        <th class="text-left">
-                            Estado
-                        </th>
-
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(costo, index) in costosAsociados" :key="index">
-                        <td>{{ costo.nombreServicio }}</td>
-                        <td>$ {{ costo.valorServicio }}</td>
-                        <td :class="costo.estadoPagoCosto ? 'bg-green' : 'bg-red'">{{ costo.estadoPagoCosto ? 'Pagado' :
-                            'Pendiente' }}</td>
-                    </tr>
-                </tbody>
-            </v-table>
-        </v-card>
         <v-card v-if="costos.value != []" class=" mx-auto mt-5" max-width="500">
             <v-card-subtitle class="text-h5 py-5 px-3 text-indigo">
                 Contabilidad

@@ -3,10 +3,15 @@
 import { useContabilidadStore } from '../stores/contabilidad';
 import { propertyPrice } from '@/helpers';
 import { RouterLink } from 'vue-router';
-
-
+import { onMounted } from 'vue';
 
 const contabilidad = useContabilidadStore();
+
+
+onMounted(async ()=>{
+    await contabilidad.fetchContabilidadMantenciones();
+})
+
 
 const nombresMeses = {
     '01': 'Enero',
@@ -25,6 +30,7 @@ const nombresMeses = {
 };
 </script>
 <template>
+    <v-btn class="bg-indigo mb-5" :to="{ name: 'dashboard' }">Ir a Dashboard</v-btn>
     <div class="container">
         <div class="reporte-container">
             <h2 class="reporte-title text-indigo" >Ganancias por Mes</h2>
@@ -43,8 +49,9 @@ const nombresMeses = {
                             <v-list-item-subtitle class="mt-1">
                                Mantenciones: {{ contabilidad.cantidadMantencionesPorMes[mes] || 0 }}
 
-                                <v-btn elevation="0" class="text-indigo" @click="contabilidad.verDetallePorMes(mes)"> <b>ir a detalle</b> <v-icon class="ml-2">mdi-eye-outline</v-icon> </v-btn>
+                               <v-btn size="30" icon class="bg-indigo" @click="contabilidad.verDetallePorMes(mes)"> <v-icon>mdi-eye-outline</v-icon> </v-btn>
                             </v-list-item-subtitle>
+
                             <v-divider class="mt-1"></v-divider>                   
                     </v-list-item>
                 </v-list>

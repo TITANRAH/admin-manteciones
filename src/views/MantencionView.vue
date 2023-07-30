@@ -54,7 +54,7 @@ onMounted(async () => {
         text: 'Esta mantención ya tiene costos asociados',
         showCancelButton: true,
         confirmButtonText: 'Ir a costo asociado',
-        cancelButtonText: 'Cerrar y Editar Mantención',
+      //  cancelButtonText: 'Cerrar y Editar Mantención',
         reverseButtons: true,
         icon: 'question',
         allowOutsideClick: true,
@@ -166,6 +166,8 @@ watch(mantencion, (mantencion) => {
   filtroAire.value.value = mantencion.filtroAire
   bujias.value.value = mantencion.bujias
   aceite.value.value = mantencion.aceite
+  correas.value.value = mantencion.correas
+  niveles.value.value = mantencion.niveles
   polen.value.value = mantencion.polen
   usoLaboral.value.value = mantencion.usoLaboral
   usoFamiliar.value.value = mantencion.usoFamiliar
@@ -269,8 +271,8 @@ const handleIrAcostoAsociado = () => {
   <div>
 
     <v-card max-width="800" flat class="mx-auto my-10">
-      <v-btn class="ml-2 mb-6" icon :to="{ name: 'cliente', params: { id: route.params.idCliente } }"><v-icon
-          size="30">mdi-arrow-left</v-icon></v-btn>
+      <v-btn class="bg-indigo mb-5" :to="{ name: 'cliente', params: { id: route.params.idCliente } }">Ir a Cliente</v-btn>
+     
       <v-card-title class="text-h4 font-weight-bold text-indigo" tag="h3">
        {{ !disableEdit ? 'Editar Mantención' : 'Mantención' }} 
       </v-card-title>
@@ -417,22 +419,25 @@ const handleIrAcostoAsociado = () => {
 
         <v-row>
           <v-col>
-            <v-btn v-if="showEdit" color="pink-accent-3" block @click="submit">
+            <!-- <v-btn v-if="showEdit" color="pink-accent-3" block @click="submit">
               Guardar Cambios
             </v-btn>
             <v-btn v-else color="pink-accent-3" block @click="handleEdit()">
               ¿Editar Mantención?
-            </v-btn>
+            </v-btn> -->
 
-          </v-col>
-          <v-col>
+          <!-- </v-col>
+          <v-col> -->
 
-            <v-btn block v-if="siHayCostoAsociado" @click="handleIrAcostoAsociado()" color="blue-accent-3">
+            <!-- <v-btn block v-if="siHayCostoAsociado" @click="handleIrAcostoAsociado()" color="blue-accent-3">
+              Ir a Costo asociado
+            </v-btn> -->
+            <v-btn block  @click="handleIrAcostoAsociado()" color="blue-accent-3">
               Ir a Costo asociado
             </v-btn>
-            <v-btn v-else color="blue-accent-3" block @click="submit">
+            <!-- <v-btn v-else color="blue-accent-3" block @click="submit">
               Agregar Costos
-            </v-btn>
+            </v-btn> -->
 
           </v-col>
         </v-row>

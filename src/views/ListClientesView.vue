@@ -1,13 +1,15 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { collection, getDocs, getDoc, doc, deleteDoc } from 'firebase/firestore';
-import { useFirestore } from 'vuefire';
+import { useFirestore, useFirebaseStorage } from 'vuefire';
+import { ref as storageRef, deleteObject } from 'firebase/storage'
 import useMantenciones from '../composables/useMaintenance';
 import { useRouter } from 'vue-router';
 import Swal from 'sweetalert2';
 const router = useRouter()
 const { sendMailDialog, enviarWhatsapp } = useMantenciones();
 const db = useFirestore();
+const storage = useFirebaseStorage()
 const clientes = ref([]);
 const selectedImage = ref('');
 const showStates = ref([]);
@@ -89,11 +91,17 @@ onMounted(async () => {
 const filteredClientes = computed(() => {
   const searchTermLower = searchTerm.value.toLowerCase().trim();
   return clientes.value.filter(cliente => {
-    const nombreLower = cliente?.nombreDueño?.toLowerCase() || '';
+    const nombreLower = cliente?.nombreCliente?.toLowerCase() || '';
     const patenteLower = cliente?.patenteVehiculo?.toLowerCase() || '';
     return nombreLower.includes(searchTermLower) || patenteLower.includes(searchTermLower);
   });
 });
+
+
+
+
+
+
 
 const irAmantencion = (idCliente, idMantencion) => {
   console.log(idCliente)
@@ -139,7 +147,17 @@ const eliminarCliente = async (clienteId) => {
         }
 
         // Eliminar el cliente de la colección de clientes
-        await deleteDoc(clienteDoc.ref);
+        const { imagen } = clienteDoc.data()
+
+        console.log('producto en firebase desde delete', imagen)
+
+        const imageRef = storageRef(storage, imagen)
+
+        await Promise.all([
+          deleteDoc(clienteDoc.ref),
+          deleteObject(imageRef)
+        ])
+        // await deleteDoc(clienteDoc.ref);
 
         // Actualizar la lista de clientes después de eliminar el cliente
         const nuevosClientesSnapshot = await getDocs(clientesCollectionRef);
@@ -173,12 +191,13 @@ const eliminarCliente = async (clienteId) => {
 };
 </script>
 <template>
+   <v-btn class="bg-indigo mb-5" :to="{ name: 'dashboard' }">Ir a Dashboard</v-btn>
   <v-text-field v-model="searchTerm" label="Buscar por nombre o patente" class="mb-4"></v-text-field>
   <v-card-subtitle class="text-h5 py-5 px-3 text-indigo mb-6">
     Tus Clientes
   </v-card-subtitle>
-  <div class="cards">
-    <v-card class="mx-auto mb-4 bg-indigo card" v-for="(cliente, index) of filteredClientes" :key="index">
+  <div class="cards" >
+    <v-card class="mx-auto mb-4 bg-indigo card" min-width="250" v-for="(cliente, index) in filteredClientes" :key="index">
       <div class="card-image">
         <v-img :src="cliente.foto" height="200px" cover></v-img>
         <v-btn :icon="true" class="delete-icon bg-red  mt-2 mr-2" @click="eliminarCliente(cliente.id)">
@@ -222,9 +241,9 @@ const eliminarCliente = async (clienteId) => {
       </v-dialog>
       <h3 class="sin-mantenciones" v-if="cliente.mantencionesRealizadas.length == []">Sin Mantenciones aún</h3>
       <v-card-actions v-else>
-        <h3 variant="text">
-          Mantenciones
-        </h3>
+        <h4>
+          Mantenciones activas
+        </h4>
         <v-spacer></v-spacer>
         <v-btn :icon="showStates[index] ? 'mdi-chevron-up' : 'mdi-chevron-down'"
           @click="showStates[index] = !showStates[index]"></v-btn>
@@ -251,7 +270,12 @@ const eliminarCliente = async (clienteId) => {
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: left;
+  max-height: 60vh;
+  overflow-y:scroll;
+  margin-bottom: 1rem;
+
 }
+
 .delete-icon {
   position: absolute;
   top: 0;
@@ -268,6 +292,7 @@ const eliminarCliente = async (clienteId) => {
 
 .card {
   width: 250px;
+  
 }
 
 .boton-ir {
@@ -293,4 +318,5 @@ const eliminarCliente = async (clienteId) => {
     display: flex;
     justify-content: center;
   }
-}</style>
+}
+</style>

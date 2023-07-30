@@ -317,7 +317,7 @@ const eventosFiltrados = computed(() => {
 });
 </script>
 <template>
-  <v-btn class="ml-2 mb-3" icon :to="{name: 'dashboard'}"><v-icon size="30">mdi-arrow-left</v-icon></v-btn>
+   <v-btn class="bg-indigo mb-5" :to="{ name: 'dashboard' }">Ir a Dashboard</v-btn>
   <div class='demo-app'>
    
   
@@ -362,7 +362,7 @@ const eventosFiltrados = computed(() => {
 
     <v-dialog v-model="modalOpen" max-width="500px">
 
-      <v-card>
+      <v-card max-width="800">
         <v-card-title>
           <span class="headline">Crear Nuevo Evento</span>
         </v-card-title>
@@ -380,7 +380,7 @@ const eventosFiltrados = computed(() => {
     <!-- MODAL EDIT -->
     <v-dialog v-model="modalEdit" max-width="500px">
 
-      <v-card>
+      <v-card max-width="800">
         <v-card-title>
           <span class="headline">Editar Evento</span>
         </v-card-title>

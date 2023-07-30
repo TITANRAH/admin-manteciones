@@ -251,6 +251,7 @@ const pagado = computed(() => {
 </script>
 <template>
     <div>
+        
         <v-btn class="bg-indigo mb-6" :to="{name: 'cliente', params: {id: route.params.idCliente}}"><v-icon class="mr-2">mdi-arrow-left-bold</v-icon> Volver</v-btn>
         <v-card-subtitle class="text-h5 py-5 px-3 text-indigo">
             Ingresa los costos
@@ -337,43 +338,12 @@ const pagado = computed(() => {
 
                 </v-list>
             </v-card>
-            <div v-if="costos.value != []" class="boton mt-6">
-                <v-btn color="green" class="w-50" @click="submit">Guardar</v-btn>
-            </div>
+     
 
         </v-form>
     </div>
 
-    <v-card class="mt-6" elevation="0">
-
-        <v-card-subtitle class="text-h5 py-5 px-3 text-indigo">
-            Contabilidad
-        </v-card-subtitle>
-        <v-table>
-
-            <thead>
-                <tr>
-                    <th class="text-left">
-                        Servicio
-                    </th>
-                    <th class="text-left">
-                        Valor
-                    </th>
-                    <th class="text-left">
-                        Estado
-                    </th>
-
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="(costo, index) in costos" :key="index">
-                    <td>{{ costo.nombreServicio }}</td>
-                    <td>$ {{ costo.valorServicio }}</td>
-                    <td :class="costo.estadoPagoCosto ? 'bg-green' : 'bg-red'">{{ costo.estadoPagoCosto ? 'Pagado' : 'No pagado' }}</td>
-                </tr>
-            </tbody>
-        </v-table>
-    </v-card>
+ 
 
 
 
@@ -418,6 +388,10 @@ const pagado = computed(() => {
         </div>
 
     </v-card>
+
+    <div v-if="costos.value != []" class="boton mt-6">
+                <v-btn color="green" class="w-50" @click="submit">Guardar</v-btn>
+            </div>
 </template>
 
 

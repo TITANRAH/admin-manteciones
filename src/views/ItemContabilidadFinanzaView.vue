@@ -10,6 +10,7 @@ const route = useRoute();
 const conta = ref({});
 const progress = ref(false)
 const tab = ref('')
+const existe = ref(false)
 
 
 // Función para obtener el documento por ID desde Firebase Firestore
@@ -23,6 +24,7 @@ async function getDocumentoPorId(id) {
 
         if (snapshot.exists()) {
             conta.value = snapshot.data();
+            existe.value = true;
 
             console.log(conta.value)
 
@@ -30,12 +32,19 @@ async function getDocumentoPorId(id) {
                 progress.value = false;
             }
         } else {
+            existe.value = false
+            setTimeout(() => {
+                progress.value = false;
+            }, 2500);
             console.log('El documento no existe');
         }
     } catch (error) {
         console.error('Error al obtener el documento:', error);
         progress.value = false;
     }
+    setTimeout(() => {
+        progress.value = false;
+    }, 2000);
 }
 
 onMounted(async () => {
@@ -49,7 +58,7 @@ onMounted(async () => {
         <v-progress-circular class="center" v-if="progress" indeterminate></v-progress-circular>
     </div>
 
-    <v-card max-width="1190">
+    <v-card v-if="existe" max-width="1190">
         <v-card-title>Nombre Cliente: {{ conta.nombreCliente }}</v-card-title>
         <v-card-subtitle>Fecha de Mantención: {{ conta.fechaDeMantencion }}</v-card-subtitle>
 
@@ -87,8 +96,9 @@ onMounted(async () => {
                         <v-list-item-title>Nombre del Servicio: {{ costo.nombreServicio }}</v-list-item-title>
                         <v-list-item-subtitle>Estado de Pago: {{ costo.estadoPagoCosto ? 'Pagado' : 'Pendiente'
                         }}</v-list-item-subtitle>
-                        <v-list-item-subtitle>Fecha: {{ costo.fecha }}</v-list-item-subtitle>
-                        <v-list-item-subtitle>Valor del Servicio: {{propertyPrice(costo.valorServicio) }}</v-list-item-subtitle>
+                        <v-list-item-subtitle>Fecha de Pago: {{ costo.fecha }}</v-list-item-subtitle>
+                        <v-list-item-subtitle>Valor del Servicio: {{ propertyPrice(costo.valorServicio)
+                        }}</v-list-item-subtitle>
                     </div>
                     <v-divider class="mt-2"></v-divider>
                 </v-list-item>
@@ -101,6 +111,8 @@ onMounted(async () => {
             </v-list>
         </v-card-text>
     </v-card>
+
+    <h3 v-else class="text-indigo">no hay contabilidad que mostrar</h3>
 </template>
   
 <style>

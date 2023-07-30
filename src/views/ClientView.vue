@@ -159,8 +159,9 @@ const redirigirAMantencion = ( id) => {
 </script>
 
 <template>
+      <v-btn class="bg-indigo mb-5" :to="{ name: 'dashboard' }">Ir a Dashboard</v-btn>
      <v-card max-width="800" flat class="mx-auto">
-         <v-btn class="ml-2" icon :to="{name: 'dashboard'}"><v-icon size="30">mdi-arrow-left</v-icon></v-btn>
+        
 
       <v-form class="mt-10">
       <v-card-title class="text-h4 font-weight-bold text-indigo mb-6" tag="h3">
@@ -244,10 +245,10 @@ const redirigirAMantencion = ( id) => {
       <v-btn color="primary">
         Atención
       </v-btn>   
-      <v-card> 
-       <v-card-subtitle class="text-center mt-2"> <span style="color: black !important;"> Tienes <b>{{ mantenciones.length }} </b> {{ mantenciones.length == 1 ? 'mantención abierta aún, ¿ Deseas continuar con esta ?' : 'mantenciones abiertas aún, ¿ Deseas ir a alguna ?' }}  </span> </v-card-subtitle>
+      <v-card max-width="800"> 
+       <v-card-subtitle class="text-center mt-2"> <span style="color: black !important;"> Tienes <b>{{ mantenciones.length }} </b> {{ mantenciones.length == 1 ? 'mantención activa aún' : 'mantenciones abiertas aún, ¿ Deseas ir a alguna ?' }}  </span> </v-card-subtitle>
       <v-card-title>
-        Mantenciones:
+       <u>Mantención:</u> 
       </v-card-title>
 
       <v-list max-height="300">
@@ -261,9 +262,9 @@ const redirigirAMantencion = ( id) => {
         <v-btn color="red" text @click="dialogVisible = false">
           Cerrar
         </v-btn>
-        <v-btn color="indigo" text @click="crearMantencion()">
+        <!-- <v-btn color="indigo" text @click="crearMantencion()">
           No, crear nueva mantención
-        </v-btn>
+        </v-btn> -->
       </v-card-actions>
     </v-card>
   </v-dialog>

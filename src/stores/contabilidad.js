@@ -98,14 +98,19 @@ export const useContabilidadStore = defineStore('contabilidad', () => {
       }
 
       const filterMantencionPorMes = computed(() => {
+    
         const searchTermLower = searchTerm.value.toLowerCase().trim();
         return mantencionesPorMes.value.filter(m => {
           const nombreLower = m?.nombreCliente?.toLowerCase() || '';
           const patenteLower = m?.patenteVehiculo?.toLowerCase() || '';
+          
           return nombreLower.includes(searchTermLower) || patenteLower.includes(searchTermLower);
         });
+
+        
       });
 
+   
 
 
     return {

@@ -1,6 +1,6 @@
 
 <script setup>
-import { ref, onMounted, computed, reactive, onUnmounted } from 'vue';
+import { ref, onMounted, computed, onUnmounted } from 'vue';
 import { useFirestore } from 'vuefire';
 import { getDocs, collection } from "firebase/firestore";
 import { propertyPrice, formatedDate } from '@/helpers';
@@ -12,8 +12,7 @@ const idMantencion = ref('')
 const idCosto = ref('')
 const totalMontoDeuda = ref('')
 const patenteBuscada = ref('')
-
-
+const loadingValue = ref(true)
 
 
 const handleResize = () => {
@@ -115,23 +114,34 @@ const getCostoMantencionRoute = (idCliente, idMantencion, idCosto) => {
   return `/costo-mantencion/${idCliente}/${idMantencion}/${idCosto}`;
 };
 
+setTimeout(() => {
+
+loadingValue.value = false;
+
+}, 2500);
 
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize); // Remueve el listener cuando se desmonta el componente
+
+
+
 });
+
 
 </script>
 <template>
+
+<v-btn class="bg-indigo mb-5" :to="{ name: 'dashboard' }">Ir a Dashboard</v-btn>
   <v-text-field
   label="Buscar por Patente"
   type="text"
   v-model="patenteBuscada"
   @input="filtrarPorPatente($event.target.value)"
 ></v-text-field>
-  <div v-if="isNotMobile">
+  <div v-if="isNotMobile" >
 
 
-    <div v-if="clientesUnique.length == []" class="sk-chase">
+    <div v-if="loadingValue" class="sk-chase">
       <div class="sk-chase-dot"></div>
       <div class="sk-chase-dot"></div>
       <div class="sk-chase-dot"></div>
@@ -141,14 +151,17 @@ onUnmounted(() => {
     </div>
     <v-row v-else>
       <v-col cols="12">
-
-        <v-table class="elevation-1">
+        <div v-if="!loadingValue && clientesUnique.length == []" class="text-indigo">
+          <v-btn class="bg-indigo mb-5" :to="{ name: 'contabilidad-finanzas' }">Ir a mis Finanzas</v-btn>
+        </div>
+        
+        <v-table v-else class="elevation-1" >
           <thead>
             <tr>
               <th>Cliente</th>
               <th>Patente</th>
-              <th>Cantidad de servicios adeudados</th>
-              <th>Total monto adeudado</th>
+              <th>Cantidad de servicios adeudados x Cliente</th>
+              <th>Monto adeudado x cliente</th>
               <th>Fecha de mantención</th>
               <th>Ir a Costo Cliente</th>
             </tr>
@@ -156,7 +169,7 @@ onUnmounted(() => {
 
           <tbody>
 
-            <tr v-for="(cliente, index) in clientesUnique" :key="index">
+            <tr v-for="(cliente, index) in clientesUnique" :key="index" class="cobros-pendientes-box">
 
               <td>{{ cliente.nombre }}</td>
               <td>{{ cliente.patente }}</td>
@@ -170,11 +183,12 @@ onUnmounted(() => {
             </tr>
           </tbody>
         </v-table>
+
       </v-col>
     </v-row>
   </div>
 
-  <div v-else >
+  <div v-else  class="cobros-pendientes-box">
     <div v-if="clientesUnique.length == []" class="sk-chase">
       <div class="sk-chase-dot"></div>
       <div class="sk-chase-dot"></div>
@@ -183,16 +197,16 @@ onUnmounted(() => {
       <div class="sk-chase-dot"></div>
       <div class="sk-chase-dot"></div>
     </div>
-    <v-card v-else class="mt-3" v-for="(cliente, index) in clientesUnique" :key="index">
+    <v-card v-else class="mt-3" v-for="(cliente, index) in clientesUnique" :key="index" max-width="800">
       <v-list>
         
-          <v-list-item>
+          <v-list-item class="cobros-pendientes-box">
             <v-list-item-title><b>{{ cliente.nombre }}</b> </v-list-item-title>
             <v-list-item-subtitle>Patente:<b>{{ cliente.patente }}</b>
             </v-list-item-subtitle>
-            <v-list-item-subtitle>Cantidad de servicios adeudados:<b>{{ cliente.cantidadServiciosAdeudados }}</b>
+            <v-list-item-subtitle>Cantidad de servicios adeudados x Cliente:<b>{{ cliente.cantidadServiciosAdeudados }}</b>
             </v-list-item-subtitle>
-            <v-list-item-subtitle> Total monto adeudado: <b>{{ propertyPrice(cliente.totalMontoAdeudado)
+            <v-list-item-subtitle> Monto adeudado x cliente: <b>{{ propertyPrice(cliente.totalMontoAdeudado)
             }}</b></v-list-item-subtitle>
             <v-list-item-subtitle>Fecha de mantención:<b>{{ formatedDate(cliente.fechaMantencion)
             }}</b></v-list-item-subtitle>
@@ -212,6 +226,11 @@ onUnmounted(() => {
   </div>
 </template>
 <style>
+
+.cobros-pendientes-box{
+    max-height: 65vh;
+    overflow-x: scroll;
+  }
 .sk-chase {
   width: 80px;
   height: 80px;
@@ -314,4 +333,7 @@ onUnmounted(() => {
   0% {
     transform: scale(1.0);
   }
+
+
+ 
 }</style>

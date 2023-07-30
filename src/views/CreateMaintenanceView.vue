@@ -155,8 +155,10 @@ if (docRef.id) {
 </script>
 
 <template>
+
+<v-btn class="bg-indigo mb-5" :to="{ name: 'dashboard' }">Ir a Dashboard</v-btn>
   <v-card max-width="800" flat class="mx-auto my-10">
-    <v-btn class="ml-2 mb-6" icon :to="{name: 'cliente', params:{id: route.params.id}}"><v-icon size="30">mdi-arrow-left</v-icon></v-btn>
+  
     <v-card-title  class="text-h4 font-weight-bold text-indigo" tag="h3">
       Crear Mantención
     </v-card-title>

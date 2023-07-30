@@ -1,7 +1,7 @@
 <script setup>
 
 import useMantenciones from '../composables/useMaintenance'
-import Mantencion from '../components/Mantencion.vue';
+import Mantencion from '../components/mantencion.vue';
 import { useField } from 'vee-validate';
 import { } from 'vue';
 

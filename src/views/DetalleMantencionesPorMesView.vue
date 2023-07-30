@@ -63,7 +63,7 @@ const mesConsulta = computed(()=>{
             </tr>
         </thead>
         <tbody>
-            <tr v-for="(mantencion, index) in store.filterMantencionPorMes" :key="index">
+            <tr v-for="(mantencion, index) in store.filterMantencionPorMes.sort((b, a) => new Date(a.fechaDeMantencion) - new Date(b.fechaDeMantencion))" :key="index">
                 <td>{{ mantencion.nombreCliente }}</td>
                 <td>{{ mantencion.patenteVehiculo }}</td>
                 <td>{{ propertyPrice(mantencion.valorContable) }}</td>
@@ -73,7 +73,7 @@ const mesConsulta = computed(()=>{
         </tbody>
     </table>
 
-    <v-card class="mb-3" v-else v-for="(mantencion, index) in store.mantencionesPorMes" :key="index" min-width="355">
+    <v-card class="mb-3" v-else v-for="(mantencion, index) in store.filterMantencionPorMes.sort((b, a) => new Date(a.fechaDeMantencion) - new Date(b.fechaDeMantencion))" :key="index" min-width="355">
         <v-list>
 
             <v-list-item>
@@ -144,6 +144,8 @@ const mesConsulta = computed(()=>{
     width: 100%;
     border-collapse: collapse;
     border: 1px solid #ccc;
+    max-height: 65vh;
+    overflow-y: scroll;
 }
 
 .table th,

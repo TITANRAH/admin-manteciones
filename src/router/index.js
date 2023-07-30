@@ -34,12 +34,7 @@ const router = createRouter({
       component: ()=> import('../views/MantencionPorClienteView.vue'),
       meta: {requiresAuth: true}
     },
-    // {
-    //   path: '/agregar-mantencion',
-    //   name: 'agregar-mantencion',
-    //   component: ()=> import('../views/AddMaintenance.vue'),
-    //   meta: {requiresAuth: true}
-    // },
+
     {
       path: '/mantenciones/editar_mantencion/:id',
       name: 'nueva-mantencion',

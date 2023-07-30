@@ -49,6 +49,7 @@ const submit = handleSubmit(async(values) => {
 console.log('cliente', cliente)
 cliente.patenteVehiculo = cliente.patenteVehiculo.toLowerCase()
 
+
 const docRef = await addDoc(collection(db, "clientes"), {
   ...cliente,
   imagen: url.value,
@@ -62,7 +63,7 @@ if (docRef.id) {
       title: 'Guardado correctamente, ¿Deseas crear una Mantención?',
       showCancelButton: true,
       confirmButtonText: 'Si',
-      cancelButtonText: 'Volver a Calendario',
+      cancelButtonText: 'Volver a Dashboard',
       reverseButtons: true,
       icon: 'question',
     }).then((result) => {
@@ -71,7 +72,7 @@ if (docRef.id) {
         router.push({ name: 'crear-mantencion', params: {id:docRef.id} })
       } else if (result.dismiss === Swal.DismissReason.cancel) {
         // Redirigir a la página de "crear un costo asociado"
-        router.push({ name: 'calendario-general' })
+        router.push({ name: 'dashboard' })
       }
     }); 
 }
@@ -82,7 +83,7 @@ if (docRef.id) {
 
 <template>
     <v-card max-width="800" flat class="mx-auto">
-        <v-btn class="ml-2 mb-5" icon :to="{name: 'dashboard'}"><v-icon size="30">mdi-arrow-left</v-icon></v-btn>
+      <v-btn class="bg-indigo mb-5" :to="{ name: 'dashboard' }">Ir a Dashboard</v-btn>
       <v-card-title class="text-h4 font-weight-bold text-indigo" tag="h3">
        Crear Cliente
       </v-card-title>
