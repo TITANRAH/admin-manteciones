@@ -38,21 +38,6 @@ export default function useMantenciones() {
     }
   });
 
-  // pasar a logica de fecha
-  //    const contactarCliente = (km, proxKm)=>{
-  //     if(parseInt(km) != null && proxKm != ''){
-
-  //       if( (proxKm + parseInt(km)) - parseInt(km) <= 15000){      
-  //        contactar.value = true
-  //       } else if (((parseInt(km) - proxKm ) <= 10000)){       
-  //         contactar.value = true
-  //       } else {
-  //         console.log((proxKm + parseInt(km)) - parseInt(km))
-  //       }
-  //     }
-  //  }
-
-
   const enviarWhatsapp = (numeroCliente, nombreCliente) => {
 
     console.log('numero', nombreCliente)
@@ -64,21 +49,28 @@ export default function useMantenciones() {
     }
   };
 
-  const sendMail = async (mailCliente, idDoc) => {
+  const sendMail = async (mailCliente, nombreDueño) => {
     const dataMail = {
       to: `${mailCliente}`,
-      from: 'granrah1@gmail.com',
+      from: 'tapiamecanico2023@gmail.com',
       subject: 'Tu vehículo esta próximo a necesitar una mantención',
       text: 'Mantención de tu Vehículo!',
-      html: '<p>Hola!, soy Diego, realicé la mantención de tu auto hace un tiempo y te quería recordar que tu vehículo está próximo a necesitar una nueva mantención, hablemos, contáctactame al: <br/> <b><a href="tel:+56999670451">+56999670451</a></b></p> <p>O bién respondeme este correo.</p><br/><p>Atte. Diego Tapia<p/><b><p>Ingeniero Mecánico<p/></b>'
+      html: `<p>Hola! <b>${nombreDueño}</b>, soy Diego, realicé la mantención de tu auto hace un tiempo y te quería recordar que tu vehículo está próximo a necesitar una nueva mantención, hablemos, contáctactame al: <br/> <b><a href="tel:+56999670451">+56999670451</a></b></p> <p>O bién respondeme este correo.</p><br/><p>Atte. Diego Tapia<p/><b><p>Ingeniero Mecánico<p/></b>`
     }
+ 
     try {
-      const response = await axios.post('https://servernodemailer-production.up.railway.app/api/mail', dataMail).then(async (resp) => {
-        console.log('respuesta de servicio mail', resp)
-        cambiarCampo(idDoc, false)
-      });
+      const response = await axios.post('https://servernodemailer-production.up.railway.app/api/mail', dataMail);
+  
+      if (response.status === 200) {
+      
+        Swal.fire({
+          title: `¡Correo enviado! a ${nombreDueño} `,
+          text: 'El correo ha sido enviado exitosamente. con aviso de Mantención',
+          icon: 'success',
+        })
+      }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   }
 
@@ -110,15 +102,6 @@ export default function useMantenciones() {
     }
   }
 
- const cambiarCampo = async (idDoc, bool) =>{
-        const docRef = doc(db, 'mantenciones', idDoc)
-        const data = {
-          contactarCliente: bool,
-        }
-        await updateDoc(docRef, data).then((value) => {
-          console.log(value)
-        })
- }
 
   return {
     filterItemsCollection,
@@ -130,7 +113,6 @@ export default function useMantenciones() {
     contactarCliente,
     idDoc,
     mailCliente,
-    cambiarCampo,
     sendMail,
     sendMailDialog
   };

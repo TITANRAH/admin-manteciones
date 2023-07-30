@@ -1,5 +1,4 @@
 <script setup>
-
 import {  validacionSchema } from '@/validations/mantencionesSchema';
 import { addDoc, collection, doc } from "firebase/firestore";
 import { useField, useForm } from 'vee-validate';
@@ -7,7 +6,6 @@ import { useRouter, useRoute } from 'vue-router';
 import { useFirestore } from 'vuefire';
 import Swal from 'sweetalert2';
 import { ref } from 'vue';
-
 
 //ARRAY PARA LOS KM EN LA VISTA
 const cadaCuantosKm = [10000, 15000]
@@ -18,10 +16,6 @@ const route = useRoute()
 const db = useFirestore()
 const clienteRef = doc(db, 'clientes', route.params.id);
 const mantencionesCollectionRef = collection(clienteRef, 'mantenciones');
-
-
-
-
 
 const { handleSubmit } = useForm({
     validationSchema: {
@@ -111,10 +105,8 @@ if(mantencion.aceiteDescripcion == undefined){
     mantencion.aceiteDescripcion = ''
 }
 
+mantencion.contactarCliente = false;
 const docRef = await addDoc(mantencionesCollectionRef, mantencion);
-
-
-
 if (docRef.id) {
   console.log('docRef.id', docRef.id)
 
@@ -126,51 +118,27 @@ if (docRef.id) {
       reverseButtons: true,
       icon: 'question',
     }).then((result) => {
-      if (result.isConfirmed) {
-        // Redirigir a la página de "mantenciones"
+      if (result.isConfirmed) {   
         router.push({ name: 'crear-costo', params: { idCliente: route.params.id, idMantencion: docRef.id } });
-        // router.push({ name: 'crear-costo', params: {id:docRef.id} })
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
-        // Redirigir a la página de "crear un costo asociado"
+      } else if (result.dismiss === Swal.DismissReason.cancel) {     
         router.push({ name: 'calendario-general' })
       }
     });
-  
-}
-
-//  // Guardar en el historialMantenciones
-//  const historialRef = collection(db, 'mantenciones', docRef.id, 'historialMantenciones');
-//   const historialDocRef = await addDoc(historialRef, {
-//     ...mantencion,
-//     imagen: url.value,
-//     fecha: new Date(), // Agrega la fecha actual o cualquier otra información que desees almacenar
-//   });
-
-//   console.log("documento guardado con ID: ", docRef.id);
-//   console.log('Historial guardado con ID:', historialDocRef.id);
+  }
 })
-//FIN SUBMIT FORM
-
 
 </script>
 
 <template>
-
 <v-btn class="bg-indigo mb-5" :to="{ name: 'dashboard' }">Ir a Dashboard</v-btn>
   <v-card max-width="800" flat class="mx-auto my-10">
-  
     <v-card-title  class="text-h4 font-weight-bold text-indigo" tag="h3">
       Crear Mantención
     </v-card-title>
-
-
-
     <v-form class="mt-10">
-
         <v-card-subtitle class="text-h5 py-5 px-0 text-indigo">
       Uso del Vehículo
        </v-card-subtitle>
-
       <v-row>
        <v-col cols="6" md="4">
           <v-checkbox label="Uso Familiar" v-model="usoFamiliar.value.value" />
@@ -179,36 +147,25 @@ if (docRef.id) {
           <v-checkbox label="Uso Laboral" v-model="usoLaboral.value.value" />
         </v-col>   
       </v-row>
-
       <v-divider></v-divider>
-
       <v-card-subtitle class="text-h5 py-5 px-0 text-indigo" >
       Datos de Mantención
      </v-card-subtitle>
-
       <v-row>
-      
-
         <v-col cols="12" md="3">
           <v-text-field type="date"  label="Fecha Mantención (Hoy)" v-model="fechaMantencion.value.value" 
           :error-messages="fechaMantencion.errorMessage.value"
         />
         </v-col> 
       </v-row>
-
       <v-row>
           <v-col cols="12" md="4" >
             <v-checkbox label="¿Cambio de aceite?" v-model="aceite.value.value" />
           </v-col>
-
           <v-col cols="12" md="4"  v-if="aceite.value.value">
             <v-checkbox label="Cambio de Filtro de aceite" v-model="filtroAceite.value.value" />
-          </v-col>
-
-         
+          </v-col>      
       </v-row>
-      
-
       <v-row v-if="aceite.value.value">       
         <v-col  cols="12" md="6" >
           <v-select label="Cambio de aceite cada:  (km)"  :items="cadaCuantosKm" v-model="cambioAceite.value.value"    
@@ -218,9 +175,7 @@ if (docRef.id) {
         <v-col cols="12" md="6"  v-if="aceite.value.value" >
             <v-text-field class="mb-0" label="Aceite" v-model="aceiteDescripcion.value.value"
           />       
-          </v-col>
-         
-      
+          </v-col>  
       </v-row>
       <v-row>
         <v-col cols="12" md="4">
@@ -246,12 +201,8 @@ if (docRef.id) {
       </v-col>
       <v-card-title v-if="!revisiones.value.value" class="text-h6 font-weight-bold text-indigo mb-6" tag="h3">
       Sin Revisiones
-    </v-card-title>
- 
-   
-  </v-row>
-
-
+      </v-card-title> 
+    </v-row>
     <v-row v-if="revisiones.value.value">
       <v-col cols="12" md="4" >
           <v-checkbox label="niveles" v-model="niveles.value.value" />
@@ -297,14 +248,9 @@ if (docRef.id) {
       </v-col>   
     </v-row>
   
-     <v-divider></v-divider>
-
- 
+     <v-divider></v-divider> 
       <v-textarea class="mb-5" label="Detalles Extras" v-model="detallesVehiculo.value.value">
       </v-textarea>
-
-    
-
       <v-btn v-if="showButtonCost" color="blue-accent-3" block @click="">
         Agregar Costos
       </v-btn>

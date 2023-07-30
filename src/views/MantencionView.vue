@@ -432,12 +432,12 @@ const handleIrAcostoAsociado = () => {
             <!-- <v-btn block v-if="siHayCostoAsociado" @click="handleIrAcostoAsociado()" color="blue-accent-3">
               Ir a Costo asociado
             </v-btn> -->
-            <v-btn block  @click="handleIrAcostoAsociado()" color="blue-accent-3">
+            <v-btn block v-if="siHayCostoAsociado" @click="handleIrAcostoAsociado()" color="blue-accent-3">
               Ir a Costo asociado
             </v-btn>
-            <!-- <v-btn v-else color="blue-accent-3" block @click="submit">
+            <v-btn v-else color="blue-accent-3" block @click="submit">
               Agregar Costos
-            </v-btn> -->
+            </v-btn>
 
           </v-col>
         </v-row>

@@ -150,7 +150,7 @@ if (docRef.id) {
           </v-col>
   
           <v-col cols="12" md="4">
-            <v-select label="Año Vehículo"  :items="años" v-model="añoVehiculo.value.value" 
+            <v-select label="Año Vehículo"  :items="años.sort((a, b) => b - a)" v-model="añoVehiculo.value.value" 
             :error-messages="añoVehiculo.errorMessage.value"
             ></v-select>
           </v-col>  

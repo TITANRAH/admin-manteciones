@@ -1,24 +1,25 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { collection, getDocs, getDoc, doc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, getDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { useFirestore, useFirebaseStorage } from 'vuefire';
 import { ref as storageRef, deleteObject } from 'firebase/storage'
 import useMantenciones from '../composables/useMaintenance';
 import { useRouter } from 'vue-router';
 import Swal from 'sweetalert2';
+import { formatedDate } from '@/helpers';
 const router = useRouter()
-const { sendMailDialog, enviarWhatsapp } = useMantenciones();
+const { sendMailDialog, enviarWhatsapp, sendMail } = useMantenciones();
 const db = useFirestore();
 const storage = useFirebaseStorage()
 const clientes = ref([]);
-const selectedImage = ref('');
 const showStates = ref([]);
 const dialog = ref(false);
 const asunto = ref('');
 const descripcion = ref('');
 const correoCliente = ref('')
 const searchTerm = ref('');
-
+const contactar = ref(null);
+const fechaFormateada = ref('')
 
 const openEmailModal = (correo) => {
   correoCliente.value = correo
@@ -44,13 +45,11 @@ onMounted(async () => {
     for (const clienteDoc of clientesSnapshot.docs) {
       const mantencionesCollectionRef = collection(clienteDoc.ref, 'mantenciones');
       const mantencionesSnapshot = await getDocs(mantencionesCollectionRef);
-
       const clienteData = clienteDoc.data();
       const clienteId = clienteDoc.id;
-
-      // Verificar si el cliente ya ha sido agregado
+ 
       if (!clientesMap[clienteId]) {
-        clientesMap[clienteId] = true; // Marcar el cliente como agregado
+        clientesMap[clienteId] = true; 
         const cliente = {
           id: clienteId,
           nombreCliente: clienteData.nombreDueño,
@@ -62,18 +61,19 @@ onMounted(async () => {
         };
         clientes.value.push(cliente);
       }
-
       for (const mantencionDoc of mantencionesSnapshot.docs) {
         const mantencionData = mantencionDoc.data();
         const clienteIndex = clientes.value.findIndex(c => c.id === clienteId);
-
+        console.log(mantencionData.contactarCliente)
         if (clienteIndex !== -1) {
           clientes.value[clienteIndex].mantencionesRealizadas.push({
             idMantencion: mantencionDoc.id,
             fechaMantencion: mantencionData.fechaMantencion,
-            descripcion: mantencionData.detalleVehiculo
-            // Otros campos de la mantención si los tienes en la base de datos
+            descripcion: mantencionData.detalleVehiculo,
+            contactarCliente: mantencionData.contactarCliente       
           });
+
+          console.log('contactarCliente', mantencionData.contactarCliente)
 
           clientes.value[clienteIndex].mantencionesRealizadas.sort((a, b) => {
             const fechaA = new Date(a.fechaMantencion);
@@ -81,6 +81,7 @@ onMounted(async () => {
             return fechaB - fechaA;
           });
         }
+        calculoFechaProximaMantencion(mantencionData.fechaMantencion, mantencionDoc.id, mantencionData.contactarCliente, clienteDoc.id)
       }
     }
   } catch (error) {
@@ -97,11 +98,52 @@ const filteredClientes = computed(() => {
   });
 });
 
+const cambiarCampo = async (idCliente, idMantencion, bool) => {
+  const clienteRef = doc(db, 'clientes', idCliente);
+  const mantencionRef = doc(clienteRef, 'mantenciones', idMantencion);
 
+  const data = {
+    contactarCliente: bool,
+  };
+  try {
+    await updateDoc(mantencionRef, data);
+    console.log('Documento de mantención actualizado correctamente.');
+  } catch (error) {
+    console.error('Error al actualizar el documento de mantención:', error);
+  }
+};
+const calculoFechaProximaMantencion = (fecha, idMantencion, contactarCliente, idCliente) => {
+  // console.log('fecha desde mantencion', fecha)
+  // const fechaOriginal = new Date(props.mantencion?.fechaMantencion fecha);
+  const fechaOriginal = new Date(fecha);
+  // console.log('fecha original ', fechaOriginal)
+  const fechaCalculada = new Date(fechaOriginal.getFullYear(), fechaOriginal.getMonth() + 6, fechaOriginal.getDate());
+  fechaFormateada.value = `${fechaCalculada.getDate()}-${fechaCalculada.getMonth() + 1}-${fechaCalculada.getFullYear()}`;
+  // console.log('fecha formateada y calculada', fechaFormateada.value)
+  const tiempoRestante = fechaCalculada.getTime() - Date.now();
+  const semanas = Math.ceil(tiempoRestante / (1000 * 60 * 60 * 24 * 7));
+  const semanasRestantes = semanas;
+  // console.log('semanasRestantes.value', semanasRestantes)
+  //  console.log('contactar Cliente desde compsable', contactarCliente.value)
 
-
-
-
+  if (semanasRestantes >= 0 && semanasRestantes <= 2 ) {
+    console.log('se cumple la condicion de semanas y es true')
+    contactar.value = true;
+    cambiarCampo(idCliente, idMantencion, true)
+    if (contactarCliente == false) {
+      cambiarCampo(idCliente, idMantencion, true)
+      contactar.value = true;
+    }
+  } else {
+    console.log('no se cumple la condicion de semanas')
+    contactar.value = false
+    cambiarCampo(idCliente, idMantencion, false)
+    if (contactarCliente == true) {
+      cambiarCampo(idCliente, idMantencion, false)
+      contactar.value = false;
+    }
+  }
+};
 
 const irAmantencion = (idCliente, idMantencion) => {
   console.log(idCliente)
@@ -112,7 +154,6 @@ const irAmantencion = (idCliente, idMantencion) => {
 const irAcliente = (idCliente) => {
   router.push({ name: 'cliente', params: { id: idCliente } })
 }
-
 
 const eliminarCliente = async (clienteId) => {
   try {
@@ -131,35 +172,27 @@ const eliminarCliente = async (clienteId) => {
       const clienteDoc = await getDoc(doc(clientesCollectionRef, clienteId));
 
       if (clienteDoc.exists()) {
-        // Eliminar las mantenciones del cliente y sus subcolecciones (costosAsociados)
+    
         const mantencionesCollectionRef = collection(clienteDoc.ref, 'mantenciones');
         const mantencionesSnapshot = await getDocs(mantencionesCollectionRef);
         for (const mantencionDoc of mantencionesSnapshot.docs) {
-          // Eliminar la subcolección costosAsociados
+  
           const costosAsociadosCollectionRef = collection(mantencionDoc.ref, 'costosMantencion');
           const costosAsociadosSnapshot = await getDocs(costosAsociadosCollectionRef);
           for (const costoDoc of costosAsociadosSnapshot.docs) {
             await deleteDoc(costoDoc.ref);
           }
-
-          // Eliminar la mantención
+       
           await deleteDoc(mantencionDoc.ref);
-        }
-
-        // Eliminar el cliente de la colección de clientes
+        } 
         const { imagen } = clienteDoc.data()
-
         console.log('producto en firebase desde delete', imagen)
-
         const imageRef = storageRef(storage, imagen)
 
         await Promise.all([
           deleteDoc(clienteDoc.ref),
           deleteObject(imageRef)
         ])
-        // await deleteDoc(clienteDoc.ref);
-
-        // Actualizar la lista de clientes después de eliminar el cliente
         const nuevosClientesSnapshot = await getDocs(clientesCollectionRef);
         clientes.value = nuevosClientesSnapshot.docs.map((doc) => {
           const clienteData = doc.data();
@@ -174,7 +207,6 @@ const eliminarCliente = async (clienteId) => {
           };
         });
 
-        // Mostrar un swal de éxito
         Swal.fire({
           title: '¡Cliente eliminado!',
           icon: 'success',
@@ -191,22 +223,23 @@ const eliminarCliente = async (clienteId) => {
 };
 </script>
 <template>
-   <v-btn class="bg-indigo mb-5" :to="{ name: 'dashboard' }">Ir a Dashboard</v-btn>
+  <v-btn class="bg-indigo mb-5" :to="{ name: 'dashboard' }">Ir a Dashboard</v-btn>
   <v-text-field v-model="searchTerm" label="Buscar por nombre o patente" class="mb-4"></v-text-field>
   <v-card-subtitle class="text-h5 py-5 px-3 text-indigo mb-6">
     Tus Clientes
   </v-card-subtitle>
-  <div class="cards" >
-    <v-card class="mx-auto mb-4 bg-indigo card" max-width="800" v-for="(cliente, index) in filteredClientes" :key="index">
+  <div class="cards">
+    <v-card class="mx-auto mb-4 card" :class="cliente.mantencionesRealizadas.contactarCliente ? 'bg-red' : 'bg-indigo'"
+      max-width="800" v-for="(cliente, index) in filteredClientes" :key="index"> 
       <div class="card-image">
         <v-img :src="cliente.foto" height="200px" cover></v-img>
         <v-btn :icon="true" class="delete-icon bg-red  mt-2 mr-2" @click="eliminarCliente(cliente.id)">
           <v-icon>mdi-delete</v-icon>
         </v-btn>
+      </div>   
+      <div v-for="mantencion in cliente.mantencionesRealizadas">
+       <v-btn @click="showStates[index] = !showStates[index]" v-if="mantencion.contactarCliente == true" class="badge" icon> <v-icon color="red" size="30"  >mdi-bell-badge</v-icon> </v-btn>      
       </div>
-      <v-card-title>
-        {{ cliente.nombreDueño }}
-      </v-card-title>
       <v-card-subtitle>
         <b>Nombre:</b> {{ cliente.nombreCliente }}
       </v-card-subtitle>
@@ -250,14 +283,22 @@ const eliminarCliente = async (clienteId) => {
       </v-card-actions>
       <v-expand-transition>
         <div v-show="showStates[index]">
-          <v-card-text v-for="mantencion of cliente.mantencionesRealizadas">
-            <div class="boton-ir">
-              <span>{{ mantencion.fechaMantencion }} </span>
-              <v-btn @click="irAmantencion(cliente.id, mantencion.idMantencion)" class="bg-light">Ir
-                <v-icon>mdi-arrow-right</v-icon></v-btn>
-            </div>
+          <v-card-text v-for="mantencion of cliente.mantencionesRealizadas"
+            :class="mantencion.contactarCliente ? 'bg-red' : 'bg-indigo'">           
+            <v-row>
+              <v-col>
+                <div class="boton-ir">
+                  <span>{{ formatedDate(mantencion.fechaMantencion) }} </span>
+                  <v-btn @click="irAmantencion(cliente.id, mantencion.idMantencion)" class="bg-light">Ir
+                    <v-icon>mdi-arrow-right</v-icon></v-btn>
+                  </div>                 
+                </v-col>             
+                <v-col v-if="mantencion.contactarCliente">
+                  <v-btn @click="sendMail(cliente.correoCliente, cliente.nombreCliente)" class="bg-light">Aviso de Mantención
+                  </v-btn>               
+              </v-col>
+            </v-row>
           </v-card-text>
-
         </div>
       </v-expand-transition>
     </v-card>
@@ -271,7 +312,7 @@ const eliminarCliente = async (clienteId) => {
   flex-wrap: wrap;
   justify-content: left;
   max-height: 60vh;
-  overflow-y:scroll;
+  overflow-y: scroll;
   margin-bottom: 1rem;
 
 }
@@ -280,6 +321,14 @@ const eliminarCliente = async (clienteId) => {
   position: absolute;
   top: 0;
   right: 0;
+}
+
+.badge{
+  position: absolute;
+  top: 0;
+  right: 1;
+  margin-left: 0.5rem;
+  margin-top: 0.5rem;
 }
 
 
@@ -292,7 +341,7 @@ const eliminarCliente = async (clienteId) => {
 
 .card {
   width: 250px;
-  
+
 }
 
 .boton-ir {
