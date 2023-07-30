@@ -253,7 +253,7 @@ const pagado = computed(() => {
     <div>
         
         <v-btn class="bg-indigo mb-6" :to="{name: 'cliente', params: {id: route.params.idCliente}}"><v-icon class="mr-2">mdi-arrow-left-bold</v-icon> Volver</v-btn>
-        <v-card-subtitle class="text-h5 py-5 px-3 text-indigo">
+        <v-card-subtitle class="text-h5 py-5 px-3 text-indigo" >
             Ingresa los costos
         </v-card-subtitle>
         <v-form>
@@ -307,7 +307,7 @@ const pagado = computed(() => {
                 </tbody>
             </v-table>
 
-            <v-card v-if="isNotMobile" class="mt-3" v-for="(costo, index) in costos" :key="index">
+            <v-card max-width="800" v-if="isNotMobile" class="mt-3" v-for="(costo, index) in costos" :key="index">
                 <v-list>
 
                     <v-list-item>

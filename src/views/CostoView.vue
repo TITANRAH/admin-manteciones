@@ -453,7 +453,7 @@ watch(
                 </tbody>
             </v-table>
 
-            <v-card v-else class="mt-3" v-for="(costo, index) in costosAsociados" :key="index">
+            <v-card max-width="800" v-else class="mt-3" v-for="(costo, index) in costosAsociados" :key="index">
                 <v-list>
 
                     <v-list-item>
