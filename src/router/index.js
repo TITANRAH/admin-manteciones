@@ -124,6 +124,12 @@ const router = createRouter({
       component: () => import('../views/DetalleMantencionesPorMesView.vue'),
       meta: {requiresAuth: true}
     },
+    {
+      path: '/proximas-atenciones-mantenciones',
+      name: 'proximas-atenciones-mantenciones',
+      component: () => import('../views/ProximasAtencionesView.vue'),
+      meta: {requiresAuth: true}
+    },
 
 
    

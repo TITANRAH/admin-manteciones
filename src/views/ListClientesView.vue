@@ -98,52 +98,52 @@ const filteredClientes = computed(() => {
   });
 });
 
-const cambiarCampo = async (idCliente, idMantencion, bool) => {
-  const clienteRef = doc(db, 'clientes', idCliente);
-  const mantencionRef = doc(clienteRef, 'mantenciones', idMantencion);
+// const cambiarCampo = async (idCliente, idMantencion, bool) => {
+//   const clienteRef = doc(db, 'clientes', idCliente);
+//   const mantencionRef = doc(clienteRef, 'mantenciones', idMantencion);
 
-  const data = {
-    contactarCliente: bool,
-  };
-  try {
-    await updateDoc(mantencionRef, data);
-    console.log('Documento de mantención actualizado correctamente.');
-  } catch (error) {
-    console.error('Error al actualizar el documento de mantención:', error);
-  }
-};
-const calculoFechaProximaMantencion = (fecha, idMantencion, contactarCliente, idCliente) => {
-  // console.log('fecha desde mantencion', fecha)
-  // const fechaOriginal = new Date(props.mantencion?.fechaMantencion fecha);
-  const fechaOriginal = new Date(fecha);
-  // console.log('fecha original ', fechaOriginal)
-  const fechaCalculada = new Date(fechaOriginal.getFullYear(), fechaOriginal.getMonth() + 6, fechaOriginal.getDate());
-  fechaFormateada.value = `${fechaCalculada.getDate()}-${fechaCalculada.getMonth() + 1}-${fechaCalculada.getFullYear()}`;
-  // console.log('fecha formateada y calculada', fechaFormateada.value)
-  const tiempoRestante = fechaCalculada.getTime() - Date.now();
-  const semanas = Math.ceil(tiempoRestante / (1000 * 60 * 60 * 24 * 7));
-  const semanasRestantes = semanas;
-  // console.log('semanasRestantes.value', semanasRestantes)
-  //  console.log('contactar Cliente desde compsable', contactarCliente.value)
+//   const data = {
+//     contactarCliente: bool,
+//   };
+//   try {
+//     await updateDoc(mantencionRef, data);
+//     console.log('Documento de mantención actualizado correctamente.');
+//   } catch (error) {
+//     console.error('Error al actualizar el documento de mantención:', error);
+//   }
+// };
+// const calculoFechaProximaMantencion = (fecha, idMantencion, contactarCliente, idCliente) => {
+//   // console.log('fecha desde mantencion', fecha)
+//   // const fechaOriginal = new Date(props.mantencion?.fechaMantencion fecha);
+//   const fechaOriginal = new Date(fecha);
+//   // console.log('fecha original ', fechaOriginal)
+//   const fechaCalculada = new Date(fechaOriginal.getFullYear(), fechaOriginal.getMonth() + 6, fechaOriginal.getDate());
+//   fechaFormateada.value = `${fechaCalculada.getDate()}-${fechaCalculada.getMonth() + 1}-${fechaCalculada.getFullYear()}`;
+//   // console.log('fecha formateada y calculada', fechaFormateada.value)
+//   const tiempoRestante = fechaCalculada.getTime() - Date.now();
+//   const semanas = Math.ceil(tiempoRestante / (1000 * 60 * 60 * 24 * 7));
+//   const semanasRestantes = semanas;
+//   // console.log('semanasRestantes.value', semanasRestantes)
+//   //  console.log('contactar Cliente desde compsable', contactarCliente.value)
 
-  if (semanasRestantes >= 0 && semanasRestantes <= 2 ) {
-    console.log('se cumple la condicion de semanas y es true')
-    contactar.value = true;
-    cambiarCampo(idCliente, idMantencion, true)
-    if (contactarCliente == false) {
-      cambiarCampo(idCliente, idMantencion, true)
-      contactar.value = true;
-    }
-  } else {
-    console.log('no se cumple la condicion de semanas')
-    contactar.value = false
-    cambiarCampo(idCliente, idMantencion, false)
-    if (contactarCliente == true) {
-      cambiarCampo(idCliente, idMantencion, false)
-      contactar.value = false;
-    }
-  }
-};
+//   if (semanasRestantes >= 0 && semanasRestantes <= 2 ) {
+//     console.log('se cumple la condicion de semanas y es true')
+//     contactar.value = true;
+//     cambiarCampo(idCliente, idMantencion, true)
+//     if (contactarCliente == false) {
+//       cambiarCampo(idCliente, idMantencion, true)
+//       contactar.value = true;
+//     }
+//   } else {
+//     console.log('no se cumple la condicion de semanas')
+//     contactar.value = false
+//     cambiarCampo(idCliente, idMantencion, false)
+//     if (contactarCliente == true) {
+//       cambiarCampo(idCliente, idMantencion, false)
+//       contactar.value = false;
+//     }
+//   }
+// };
 
 const irAmantencion = (idCliente, idMantencion) => {
   console.log(idCliente)
@@ -230,7 +230,7 @@ const eliminarCliente = async (clienteId) => {
   </v-card-subtitle>
   <div class="cards">
     <v-card class="mx-auto mb-4 card" :class="cliente.mantencionesRealizadas.contactarCliente ? 'bg-red' : 'bg-indigo'"
-      max-width="800" v-for="(cliente, index) in filteredClientes" :key="index"> 
+      min-width="300" v-for="(cliente, index) in filteredClientes" :key="index"> 
       <div class="card-image">
         <v-img :src="cliente.foto" height="200px" cover></v-img>
         <v-btn :icon="true" class="delete-icon bg-red  mt-2 mr-2" @click="eliminarCliente(cliente.id)">
@@ -255,6 +255,7 @@ const eliminarCliente = async (clienteId) => {
           <a :href="`tel:${cliente.fonoCliente}`"><v-btn size="40" class="mr-3 bg-yellow"
               icon><v-icon>mdi-phone</v-icon></v-btn></a>
           <v-btn size="40" @click="irAcliente(cliente.id)" class="mr-3 bg-black" icon><v-icon>mdi-pencil</v-icon></v-btn>
+          <v-btn size="40" @click="irAcliente(cliente.id)" class="mr-3 bg-purple" icon><v-icon size="25">mdi-history</v-icon></v-btn>
         </v-row>
       </v-card-subtitle>
       <v-dialog v-model="dialog" max-width="500px">
@@ -272,7 +273,7 @@ const eliminarCliente = async (clienteId) => {
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <h3 class="sin-mantenciones" v-if="cliente.mantencionesRealizadas.length == []">Sin Mantenciones aún</h3>
+      <h3 class="sin-mantenciones" v-if="cliente.mantencionesRealizadas.length == []">Sin Mantenciones Nuevas</h3>
       <v-card-actions v-else>
         <h4>
           Mantenciones activas

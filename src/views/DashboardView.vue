@@ -1,18 +1,3 @@
-<template>
-   <h2 class="reporte-title text-indigo" > <u>DASHBOARD</u> </h2>
-  <div class="dashboard-container">
-
-   
-    <div class="dashboard-card" v-for="card in cards" :key="card.title" @click="goToRoute(card.route)">
-      <div class="dashboard-card-content" :style="{ backgroundColor: card.backgroundColor }">
-        <v-icon class="material-icons" style="font-size: 50px;">{{ card.icono }}</v-icon>
-        <div class="card-title">{{ card.title }}</div>
-        <div class="card-description">{{ card.description }}</div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup>
 import { ref } from 'firebase/storage';
 import { useRouter } from 'vue-router';
@@ -22,7 +7,7 @@ const cards = ref([
   {
     title: 'Clientes',
     description: 'Ver Clientes',
-    icono: 'mdi-account',
+    icono: 'mdi-account-group-outline',
     route: 'listado-clientes',
     backgroundColor: 'indigo',
   },
@@ -35,17 +20,24 @@ const cards = ref([
   },
   {
     title: 'Finanzas',
-    description: 'Ver finanzas',
+    description: 'Ver Finanzas',
     icono: 'mdi-cash-register',
     route: 'contabilidad-finanzas',
     backgroundColor: 'teal',
   },
   {
     title: 'Pendientes de pago',
-    description: 'Ve a los pendientes',
+    description: 'Ver Cobros Pendientes',
     icono: 'mdi-cash-sync',
     route: 'cobros-pendientes',
     backgroundColor: 'purple',
+  },
+  {
+    title: 'Próximas atenciones',
+    description: 'Ver Próximas Atenciones',
+    icono: 'mdi-car-clock',
+    route: 'proximas-atenciones-mantenciones',
+    backgroundColor: 'green',
   },
   // Agrega más objetos para tener más cajas
 ]);
@@ -54,6 +46,21 @@ function goToRoute(route) {
   router.push({ name: route });
 }
 </script>
+<template>
+  <h2 class="reporte-title text-indigo"> <u>DASHBOARD</u> </h2>
+  <div class="dashboard-container">
+
+
+    <div class="dashboard-card" v-for="card in cards" :key="card.title" @click="goToRoute(card.route)">
+      <div class="dashboard-card-content" :style="{ backgroundColor: card.backgroundColor }">
+        <v-icon class="material-icons" style="font-size: 50px;">{{ card.icono }}</v-icon>
+        <div class="card-title">{{ card.title.toUpperCase() }}</div>
+        <div class="card-description">{{ card.description }}</div>
+      </div>
+    </div>
+  </div>
+</template>
+
 
 <style scoped>
 .dashboard-container {

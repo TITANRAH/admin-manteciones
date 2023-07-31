@@ -45,10 +45,13 @@ const toggle = () => {
         <v-divider></v-divider>
 
         <v-list v-if="auth.isAuth" density="compact" nav >
+          <v-list-item  prepend-icon="mdi-car-settings" title="Dashboard" @click="toggle()" value="dashboard" :to="{name: 'dashboard'}"></v-list-item>
+          <v-list-item  prepend-icon="mdi-cash-register" title="Finanzas" value="finanzas" :to="{name: 'contabilidad-finanzas'}"></v-list-item>
           <v-list-item  prepend-icon="mdi-car-arrow-right" @click="toggle()" title="Crear Cliente" value="car" :to="{name: 'crear-cliente'}"></v-list-item>
           <v-list-item  prepend-icon="mdi-account-group-outline" @click="toggle()" title="Clientes" value="clientes" :to="{name: 'listado-clientes'}" ></v-list-item>
-          <v-list-item  prepend-icon="mdi-car-settings" title="Dashboard" @click="toggle()" value="dashboard" :to="{name: 'dashboard'}"></v-list-item>
-          <v-list-item  prepend-icon="mdi-calendar" title="Calendario General" @click="toggle()" value="calendar" :to="{name: 'calendario-general'}"></v-list-item>
+          <v-list-item  prepend-icon="mdi-calendar-range" title="Calendario" @click="toggle()" value="calendar" :to="{name: 'calendario-general'}"></v-list-item>
+          <v-list-item  prepend-icon="mdi-car-clock" title="Próximas atenciones" value="proximas-atenciones" :to="{name: 'proximas-atenciones-mantenciones'}"></v-list-item>
+          <v-list-item  prepend-icon="mdi-cash-sync" title="Pendientes de Pago" value="pendientes" :to="{name: 'cobros-pendientes'}"></v-list-item>
           <v-list-item  prepend-icon="mdi-logout" title="Salir" @click="auth.logout()" value="salir" :to="{name: 'login'}"></v-list-item>
 
         </v-list>

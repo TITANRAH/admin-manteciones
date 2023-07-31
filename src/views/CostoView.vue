@@ -1,5 +1,5 @@
 <script setup>
-import { doc, getDoc, updateDoc, addDoc, collection, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, where, addDoc, collection, deleteDoc, query, setDoc, getDocs } from 'firebase/firestore';
 import Swal from 'sweetalert2';
 import { useField } from 'vee-validate';
 import { computed, onMounted, ref, watch } from 'vue';
@@ -24,13 +24,15 @@ const usoFamiliar = ref(null)
 const usoLaboral = ref(null)
 const aceiteDescripcion = ref('')
 const cambioAceite = ref('')
-const inspeccionVisualMotor= ref(null)
+const inspeccionVisualMotor = ref(null)
 const patenteVehiculo = ref('')
 const descripcionServicio = ref('')
 const fechaDeMantencion = ref('')
 const isNotMobile = ref(false)
 const documento = ref({})
 const costos = ref([])
+const fechaFormateada = ref('')
+
 
 console.log('id costo', route.params.idCosto)
 
@@ -117,12 +119,12 @@ onMounted(async () => {
         aceiteDescripcion.value = mantencionData.aceiteDescripcion
         cambioAceite.value = mantencionData.cambioAceite
         inspeccionVisualMotor.value = mantencionData.inspeccionVisualMotor
-        
+
     }
     costosAsociados.value.every(
         (costo) => {
             if (costo.estadoPagoCosto === true) {
-                console.log('si vienen todos en true')     
+                console.log('si vienen todos en true')
                 showButtonFinishCost.value = true;
             } else {
 
@@ -201,7 +203,7 @@ const submitUpdateCost = async (event) => {
             costo.valorServicio === null ||
             costo.valorServicio === '' ||
             costo.valorServicio === undefined
-            
+
         );
     });
 
@@ -277,7 +279,7 @@ const submitFinishedCost = (event) => {
             costo.nombreServicio === undefined ||
             costo.valorServicio === null ||
             costo.valorServicio === '' ||
-            costo.valorServicio === undefined      
+            costo.valorServicio === undefined
         );
     });
     if (camposInvalidos) {
@@ -287,7 +289,7 @@ const submitFinishedCost = (event) => {
             icon: 'error',
             confirmButtonText: 'Aceptar'
         });
-        return; 
+        return;
     }
     event.preventDefault()
     const todosPagados = costosAsociados.value.every(costo => costo.estadoPagoCosto == true);
@@ -335,12 +337,12 @@ const submitFinishedCost = (event) => {
 
                     Swal.fire({
                         title: 'Costo guardado',
-                        text: 'El costo se ha guardado en finanzas y se eliminó esta Mantención',
+                        text: `La próxima atención de este cliente la verás en Próximas Atenciones y Las ganancias irán a Finanzas.`,
                         icon: 'success',
                         confirmButtonText: 'Aceptar'
                     }).then(() => {
-                      
-                        router.push({name: 'contabilidad-finanzas'});
+
+                        router.push({ name: 'contabilidad-finanzas' });
                     });
                 }
             }
@@ -354,6 +356,71 @@ const submitFinishedCost = (event) => {
         });
     }
 }
+
+// console.log('fecha desde mantencion', fecha)
+// const fechaOriginal = new Date(props.mantencion?.fechaMantencion fecha);
+// console.log('fecha original ', fechaOriginal)
+
+
+const calculoFechaProximaMantencion = async (fecha, idCliente, nombreCliente, fonoCliente, correoCliente, patente) => {
+    const fechaOriginal = new Date(fecha);
+    const fechaCalculada = new Date(fechaOriginal.getFullYear(), fechaOriginal.getMonth() + 6, fechaOriginal.getDate());
+    fechaFormateada.value = `${fechaCalculada.getDate()}-${fechaCalculada.getMonth() + 1}-${fechaCalculada.getFullYear()}`;
+
+    const proximaAtencion = {
+        idCliente: idCliente,
+        nombreCliente: nombreCliente,
+        fechaProximaMantencion: fechaFormateada.value,
+        fonoCliente: fonoCliente,
+        correoCliente: correoCliente,
+        patente: patente
+    };
+
+    try {
+        // Verificar si ya existe un documento con el mismo idCliente en la colección ProximasAtenciones
+        const proximaAtencionQuery = query(collection(db, 'ProximasAtenciones'), where('idCliente', '==', idCliente));
+        const proximaAtencionSnapshot = await getDocs(proximaAtencionQuery);
+
+        if (!proximaAtencionSnapshot.empty) {
+            // Si la próxima atención ya existe, recorrer los documentos y actualizar el objeto correspondiente
+            proximaAtencionSnapshot.forEach((doc) => {
+                setDoc(doc.ref, proximaAtencion);
+              
+            });
+        } else {
+            // Si la próxima atención no existe, crear un nuevo documento con el objeto
+            await addDoc(collection(db, 'ProximasAtenciones'), proximaAtencion);
+          
+        }
+    } catch (error) {
+        console.error('Error al guardar o actualizar la información:', error);
+    }
+};
+// console.log('fecha formateada y calculada', fechaFormateada.value)
+//   const tiempoRestante = fechaCalculada.getTime() - Date.now();
+//   const semanas = Math.ceil(tiempoRestante / (1000 * 60 * 60 * 24 * 7));
+//   const semanasRestantes = semanas;
+
+// console.log('semanasRestantes.value', semanasRestantes)
+//  console.log('contactar Cliente desde compsable', contactarCliente.value)
+
+//   if (semanasRestantes >= 0 && semanasRestantes <= 2 ) {
+//     console.log('se cumple la condicion de semanas y es true')
+//     contactar.value = true;
+//     cambiarCampo(idCliente, idMantencion, true)
+//     if (contactarCliente == false) {
+//       cambiarCampo(idCliente, idMantencion, true)
+//       contactar.value = true;
+//     }
+//   } else {
+//     console.log('no se cumple la condicion de semanas')
+//     contactar.value = false
+//     cambiarCampo(idCliente, idMantencion, false)
+//     if (contactarCliente == true) {
+//       cambiarCampo(idCliente, idMantencion, false)
+//       contactar.value = false;
+//     }
+//   }
 
 const guardarDocumentoContabilidad = async (costosAsociados, valorContable) => {
     const fecha = new Date()
@@ -385,9 +452,13 @@ const guardarDocumentoContabilidad = async (costosAsociados, valorContable) => {
         const docRef = await addDoc(collection(db, 'ContabilidadMantencionesFinalizadas'), {
             ...documento.value
         });
-        console.log('Documento guardado en ContabilidadMantenciones con ID:', docRef.id);     
+        console.log('Documento guardado en ContabilidadMantenciones con ID:', docRef.id);
         if (docRef.id) {
-            await deleteManCost(documento.value.idCliente, documento.value.idMantencion, documento.value.idCosto)
+
+            await Promise.all([
+                deleteManCost(documento.value.idCliente, documento.value.idMantencion, documento.value.idCosto),
+                calculoFechaProximaMantencion(fechaDeMantencion.value, route.params.idCliente, nombreCliente.value, fonoCliente.value, correoCliente.value, patenteVehiculo.value)
+            ])
         }
 
     } catch (error) {
@@ -596,4 +667,5 @@ watch(
     align-content: center;
     justify-content: center;
 
-}</style>
+}
+</style>

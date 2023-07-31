@@ -21,6 +21,7 @@ const handleResize = () => {
 };
 
 onMounted(async () => {
+  
 
   handleResize(); // Ejecuta la función cuando se monta el componente
   window.addEventListener('resize', handleResize); // Agrega un listener para el evento 'resize'
